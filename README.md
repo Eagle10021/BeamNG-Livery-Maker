@@ -35,4 +35,4 @@ If you receive an "Unsupported Format" error when importing a `.dds` file:
 *   **DDS Decoding**: Custom binary parser for BC1, BC3, BC4, and BC5 formats.
 
 ---
-*Created by [Your Name/Repo Holder]* 🏁
+*Created by Eagle* 🏁
