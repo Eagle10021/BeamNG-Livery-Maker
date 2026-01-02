@@ -1669,7 +1669,7 @@ class LiveryEditor {
     // ... Loaders ...
     async loadManifest() {
         try {
-            const res = await fetch('assets/manifest.json');
+            const res = await fetch('Assets/manifest.json');
             this.manifest = await res.json();
             this.populateVehicles();
         } catch (e) {
