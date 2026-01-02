@@ -57,7 +57,7 @@ class DDSDecoder {
             else if (dxgiFormat === DXGI_FORMAT_BC4_UNORM) format = 'BC4';
             else if (dxgiFormat === DXGI_FORMAT_BC5_UNORM) format = 'BC5';
             else if (dxgiFormat === DXGI_FORMAT_BC7_UNORM || dxgiFormat === DXGI_FORMAT_BC7_UNORM_SRGB) {
-                throw new Error("Format 'BC7' is not supported by this browser-based editor yet. \n\nFIX: Please convert your DDS to 'DXT5' (BC3) using 'DDS Converter' or 'Intel Texture Works' for Photoshop.");
+                throw new Error("Unsupported Texture Format.\n\nThe file uses BC7 compression, which browsers cannot read.\n\nPlease convert this skin to DXT5 (BC3) format using Paint.NET or Photoshop and upload it manually.\n\nSee the guide for more information.");
             }
             else {
                 throw new Error(`Unsupported DXGI Format: ${dxgiFormat}`);

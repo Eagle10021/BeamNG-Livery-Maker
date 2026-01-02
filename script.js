@@ -1787,7 +1787,7 @@ class LiveryEditor {
                 img.onload = () => this.setBaseLayer(img);
             } catch (decodeErr) {
                 console.error("DDS Decode Error:", decodeErr);
-                throw new Error("Unsupported Texture Format. \n\nThe file exists but uses modern BC7 compression (which browsers can't read). \n\nPlease convert this skin to DXT5 (BC3) format using paint.net or Photoshop and upload it manually.");
+                throw new Error("Unsupported Texture Format.\n\nThe file uses BC7 compression, which browsers cannot read.\n\nPlease convert this skin to DXT5 (BC3) format using Paint.NET or Photoshop and upload it manually.\n\nSee the guide for more information.");
             }
 
         } catch (e) {
