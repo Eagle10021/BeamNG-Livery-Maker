@@ -1,6 +1,6 @@
 # 🏎️ BeamNG Livery Studio
 
-A professional-grade, browser-based livery creator specifically designed for **BeamNG.drive**. Create complex vehicle skins with vector precision, custom text, and pixel-perfect "Tattoo" layers directly in your browser.
+A browser-based livery creator specifically designed for **BeamNG.drive**. Create complex vehicle skins with vector precision, custom text, and pixel-perfect "Tattoo" layers directly in your browser.
 
 ## ✨ Key Features
 
