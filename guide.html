@@ -474,6 +474,16 @@
                     </svg>
                     <span>Troubleshooting</span>
                 </a></li>
+            <li><a href="https://github.com/Eagle10021/BeamNG-Livery-Maker/tree/master" target="_blank"
+                    class="nav-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                        </path>
+                    </svg>
+                    <span>GitHub Repo</span>
+                </a></li>
         </ul>
     </nav>
 
@@ -578,31 +588,31 @@
                 </h3>
                 <p>This file tells the engine how to apply your texture to the car's 3D model.</p>
                 <pre><code>{
-  "pickup.skin.SKINNAME": {
-    "name": "pickup.skin.SKINNAME",
-    "mapTo": "pickup.skin.SKINNAME",
+  "[VEHICLE].skin.SKINNAME": {
+    "name": "[VEHICLE].skin.SKINNAME",
+    "mapTo": "[VEHICLE].skin.SKINNAME",
     "class": "Material",
     "Stages": [
       {
-        "ambientOcclusionMap": "/vehicles/common/pickup/pickup_main_ao.data.png",
-        "baseColorMap": "/vehicles/common/pickup/pickup_main_b.color.png",
-        "metallicMap": "/vehicles/common/pickup/pickup_main_m.data.png",
+        "ambientOcclusionMap": "/vehicles/common/[VEHICLE]/[VEHICLE]_main_ao.data.png",
+        "baseColorMap": "/vehicles/common/[VEHICLE]/[VEHICLE]_main_b.color.png",
+        "metallicMap": "/vehicles/common/[VEHICLE]/[VEHICLE]_main_m.data.png",
         "metallicFactor": 1,
-        "normalMap": "vehicles/common/pickup/pickup_n.dds",
-        "roughnessMap": "/vehicles/common/pickup/pickup_main_r.data.png",
+        "normalMap": "vehicles/common/[VEHICLE]/[VEHICLE]_n.dds",
+        "roughnessMap": "/vehicles/common/[VEHICLE]/[VEHICLE]_main_r.data.png",
         "useAnisotropic": true
       },
       {
-        "ambientOcclusionMap": "/vehicles/common/pickup/pickup_main_ao.data.png",
+        "ambientOcclusionMap": "/vehicles/common/[VEHICLE]/[VEHICLE]_main_ao.data.png",
         "useAnisotropic": true,
         "diffuseMapUseUV": 1,
         "clearCoatFactor": 1,
         "clearCoatRoughnessFactor": 0.05,
         "metallicFactor": 0.5,
-        "clearCoatMap": "/vehicles/common/pickup/pickup_main_cc.data.png",
-        "normalMap": "/vehicles/common/pickup/pickup_n.dds",
-        "opacityMap": "/vehicles/pickup/pickup_skin_o.data.png",
-        "baseColorMap": "vehicles/pickup/SKINNAME/pickup_skin_SKINNAME.dds"
+        "clearCoatMap": "/vehicles/common/[VEHICLE]/[VEHICLE]_main_cc.data.png",
+        "normalMap": "/vehicles/common/[VEHICLE]/[VEHICLE]_n.dds",
+        "opacityMap": "/vehicles/[VEHICLE]/[VEHICLE]_skin_o.data.png",
+        "baseColorMap": "vehicles/[VEHICLE]/SKINNAME/[VEHICLE]_skin_SKINNAME.dds"
       },
       {},
       {}
@@ -630,7 +640,7 @@
                 </h3>
                 <p>This registers your skin in the <strong>Part Selector</strong> menu.</p>
                 <pre><code>{
-  "pickup_skin_SKINNAME": {
+  "[VEHICLE]_skin_SKINNAME": {
     "information": {
       "authors": "Your Name",
       "name": "My Custom Skin",
@@ -760,7 +770,7 @@
                 <p>The following vehicles use BC7 templates and require conversion:</p>
                 <div class="vehicle-grid">
                     <div class="vehicle-tag">Gavril MD-Series</div>
-                    <div class="vehicle-tag">Autobello Stambecco</div>
+                    <div class="vehicle-tag">Autobello Stambecco (Ambulance)</div>
                     <div class="vehicle-tag">Ibishu Miramar</div>
                     <div class="vehicle-tag">Bruckell Nine</div>
                     <div class="vehicle-tag">Gavril D-Series (Ambulance)</div>
