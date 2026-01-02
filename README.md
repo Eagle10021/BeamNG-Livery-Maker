@@ -12,19 +12,27 @@ A professional-grade, browser-based livery creator specifically designed for **B
 *   **📦 DDS Native**: Built-in DDS decoding for importing standard BeamNG textures and exporting your finished livery.
 *   **📖 Integrated Modding Guide**: Step-by-step instructions for PBR material setup and JBeam integration.
 
-## 🚀 Quick Start (GitHub Pages)
+## 🚀 Quick Start
 
-1.  Upload your `.dds` template using the **Import** button.
+1.  Use the **Import** button to upload your vehicle's `.dds` template.
 2.  Use the **Shape** or **Text** tools to build your design.
-3.  "Rasterize" complex elements to turn them into transformable **Tattoo** layers.
+3.  Use **"Rasterize to Tattoo"** to turn complex elements into transformable, recolorable stickers.
 4.  Export your final livery as a `.dds` file.
-5.  Follow the **Guide** in the app to add it to your BeamNG mod folder!
+5.  Follow the **Guide** included in the studio to add it to your BeamNG mod folder!
+
+## ⚠️ Troubleshooting: BC7 Format Errors
+
+If you receive an "Unsupported Format" error when importing a `.dds` file:
+*   **The Cause**: Modern BeamNG vehicles use **BC7 (DX10)** compression, which is not supported for direct browser decoding.
+*   **The Fix**: You must convert the template to **DXT5 (BC3)** before importing. 
+*   **How to fix**: Open the file in a tool like **Photopea** or **Photoshop**, and export it as a **DDS (DXT5/BC3)**.
+*   **Unsupported List**: Check the **"Affected Vehicles"** list in the in-app **Guide** to see which vehicles require this conversion.
 
 ## 🛠️ Technology Stack
 
 *   **Core**: HTML5, Vanilla JavaScript (ES6+)
 *   **Graphics**: Canvas API (2D Context)
-*   **DDS Decoding**: Custom binary parser for BC1, BC3, BC4, BC5 formats.
+*   **DDS Decoding**: Custom binary parser for BC1, BC3, BC4, and BC5 formats.
 
 ---
 *Created by [Your Name/Repo Holder]* 🏁
