@@ -1138,7 +1138,7 @@ class LiveryEditor {
                 if (layer.mirrorLayerId) {
                     const mirror = this.layers.find(l => l.id === layer.mirrorLayerId);
                     if (mirror) {
-                        mirror.rotation = layer.rotation;
+                        mirror.rotation = -layer.rotation;
                     }
                 }
 
@@ -2191,7 +2191,7 @@ class LiveryEditor {
             const mirror = this.layers.find(l => l.id === layer.mirrorLayerId);
             if (mirror) {
                 if (prop === 'html-rotation' || prop === 'rotation') {
-                    mirror.rotation = layer.rotation;
+                    mirror.rotation = -layer.rotation;
                 } else if (prop === 'x') {
                     mirror.x = mirror.mirrorAxis === 'h' ? this.virtualWidth - value : value;
                 } else if (prop === 'y') {
