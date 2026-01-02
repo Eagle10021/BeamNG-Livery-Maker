@@ -440,7 +440,12 @@ class LiveryEditor {
     initEvents() {
         // Navbar
         document.getElementById('vehicle-select').addEventListener('change', (e) => {
-            if (e.target.value) this.populateSkins(e.target.value);
+            const vehicle = e.target.value;
+            if (vehicle) {
+                // Try to load standard skin name. Most vehicles use 'skinname.dds', some use 'SKINNAME.dds'
+                // This is a heuristic. We'll try lowercase first.
+                this.loadSkin(`Assets/vehicles/${vehicle}/skinname.dds`);
+            }
         });
         document.getElementById('skin-select').addEventListener('change', (e) => {
             if (e.target.value) this.loadBaseSkin(e.target.value);
@@ -1680,10 +1685,11 @@ class LiveryEditor {
     populateVehicles() {
         const sel = document.getElementById('vehicle-select');
         sel.innerHTML = '<option value="">-- Select Vehicle --</option>';
-        if (this.manifest) {
-            Object.keys(this.manifest).sort().forEach(v => {
+        if (this.manifest && this.manifest.vehicles) {
+            this.manifest.vehicles.forEach(v => {
                 const opt = document.createElement('option');
-                opt.value = v; opt.innerText = v;
+                opt.value = v.id;
+                opt.innerText = v.name;
                 sel.appendChild(opt);
             });
         }
