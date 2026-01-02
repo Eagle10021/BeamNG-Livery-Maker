@@ -1,0 +1,47 @@
+{
+  "prop_containers_shipping_branding.skin_container.skinname": {
+    "name": "prop_containers_shipping_branding.skin_container.skinname",
+    "mapTo": "prop_containers_shipping_branding.skin_container.skinname",
+    "class": "Material",
+    "persistentId": "",
+    "Stages": [
+      {
+        "ambientOcclusionMap": "/vehicles/common/shipping_container/shipping_container_ao.data.png",
+        "baseColorMap": "/vehicles/common/shipping_container/shipping_container_b.color.png",
+        "colorPaletteMapUseUV": null,
+        "diffuseMapUseUV": null,
+        "metallicFactor": 1,
+        "metallicMap": "/vehicles/common/shipping_container/shipping_container_m.data.png",
+        "normalMap": "/vehicles/common/shipping_container/shipping_container_n.normal.png",
+        "opacityMapUseUV": null,
+        "roughnessMap": "/vehicles/common/shipping_container/shipping_container_r.data.png"
+      },
+      {
+        "ambientOcclusionMap": "/vehicles/common/shipping_container/shipping_container_ao.data.png",
+        "baseColorMap": "/vehicles/common/shipping_container/skinname/shipping_container_skin_skinname.dds",
+        "diffuseMapUseUV": 1,
+        "metallicFactor": 1,
+        "normalMap": "/vehicles/common/shipping_container/shipping_container_n.normal.png",
+        "opacityMap": "/vehicles/common/shipping_container/shipping_container_uv2_o.data.png",
+        "opacityMapUseUV": 1
+      },
+      {
+        "colorPaletteMapUseUV": null,
+        "diffuseMapUseUV": null,
+        "metallicFactor": null,
+        "opacityMapUseUV": null
+      },
+      {
+        "colorPaletteMapUseUV": null,
+        "diffuseMapUseUV": null,
+        "metallicFactor": null,
+        "opacityMapUseUV": null
+      }
+    ],
+    "activeLayers": 2,
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+},
+}
