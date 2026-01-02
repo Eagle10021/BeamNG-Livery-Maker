@@ -1,108 +1,108 @@
 {
-  "vehicles": [
-    {
-      "id": "bastion",
-      "name": "Bruckell Bastion"
-    },
-    {
-      "id": "vivace",
-      "name": "Cherrier Vivace"
-    },
-    {
-      "id": "etk800",
-      "name": "ETK 800 Series"
-    },
-    {
-      "id": "etkc",
-      "name": "ETK K-Series"
-    },
-    {
-      "id": "etki",
-      "name": "ETK I-Series"
-    },
-    {
-      "id": "200bx",
-      "name": "Ibishu 200BX"
-    },
-    {
-      "id": "covet",
-      "name": "Ibishu Covet"
-    },
-    {
-      "id": "hopper",
-      "name": "Ibishu Hopper"
-    },
-    {
-      "id": "miramar",
-      "name": "Ibishu Miramar"
-    },
-    {
-      "id": "pessima",
-      "name": "Ibishu Pessima"
-    },
-    {
-      "id": "pigeon",
-      "name": "Ibishu Pigeon"
-    },
-    {
-      "id": "sunburst",
-      "name": "Hirochi Sunburst"
-    },
-    {
-      "id": "sbr",
-      "name": "Hirochi SBR4"
-    },
-    {
-      "id": "bolide",
-      "name": "Civetta Bolide"
-    },
-    {
-      "id": "scintilla",
-      "name": "Civetta Scintilla"
-    },
-    {
-      "id": "barstow",
-      "name": "Gavril Barstow"
-    },
-    {
-      "id": "bluebuck",
-      "name": "Gavril Bluebuck"
-    },
-    {
-      "id": "grandmarshal",
-      "name": "Gavril Grand Marshal"
-    },
-    {
-      "id": "roamer",
-      "name": "Gavril Roamer"
-    },
-    {
-      "id": "pickup",
-      "name": "Gavril D-Series"
-    },
-    {
-      "id": "van",
-      "name": "Gavril H-Series"
-    },
-    {
-      "id": "tseries",
-      "name": "Gavril T-Series"
-    },
-    {
-      "id": "burnside",
-      "name": "Burnside Special"
-    },
-    {
-      "id": "fullsize",
-      "name": "Bruckell Moonhawk"
-    },
-    {
-      "id": "legran",
-      "name": "Bruckell LeGran"
-    },
-    {
-      "id": "wendover",
-      "name": "Soliad Wendover"
-    }
-  ]
+    "vehicles": [
+        {
+            "id": "bastion",
+            "name": "Bruckell Bastion"
+        },
+        {
+            "id": "vivace",
+            "name": "Cherrier Vivace"
+        },
+        {
+            "id": "etk800",
+            "name": "ETK 800 Series"
+        },
+        {
+            "id": "etkc",
+            "name": "ETK K-Series"
+        },
+        {
+            "id": "etki",
+            "name": "ETK I-Series"
+        },
+        {
+            "id": "200bx",
+            "name": "Ibishu 200BX"
+        },
+        {
+            "id": "covet",
+            "name": "Ibishu Covet"
+        },
+        {
+            "id": "hopper",
+            "name": "Ibishu Hopper"
+        },
+        {
+            "id": "miramar",
+            "name": "Ibishu Miramar"
+        },
+        {
+            "id": "pessima",
+            "name": "Ibishu Pessima"
+        },
+        {
+            "id": "pigeon",
+            "name": "Ibishu Pigeon"
+        },
+        {
+            "id": "sunburst",
+            "name": "Hirochi Sunburst"
+        },
+        {
+            "id": "sbr",
+            "name": "Hirochi SBR4"
+        },
+        {
+            "id": "bolide",
+            "name": "Civetta Bolide"
+        },
+        {
+            "id": "scintilla",
+            "name": "Civetta Scintilla"
+        },
+        {
+            "id": "barstow",
+            "name": "Gavril Barstow"
+        },
+        {
+            "id": "bluebuck",
+            "name": "Gavril Bluebuck"
+        },
+        {
+            "id": "grandmarshal",
+            "name": "Gavril Grand Marshal"
+        },
+        {
+            "id": "roamer",
+            "name": "Gavril Roamer"
+        },
+        {
+            "id": "pickup",
+            "name": "Gavril D-Series"
+        },
+        {
+            "id": "van",
+            "name": "Gavril H-Series"
+        },
+        {
+            "id": "tseries",
+            "name": "Gavril T-Series"
+        },
+        {
+            "id": "burnside",
+            "name": "Burnside Special"
+        },
+        {
+            "id": "fullsize",
+            "name": "Bruckell Moonhawk"
+        },
+        {
+            "id": "legran",
+            "name": "Bruckell LeGran"
+        },
+        {
+            "id": "wendover",
+            "name": "Soliad Wendover"
+        }
+    ]
 }
