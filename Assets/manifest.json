@@ -1,108 +1,206 @@
 {
-    "vehicles": [
+  "vehicles": [
+    {
+      "id": "autobello",
+      "name": "Autobello Piccolina"
+    },
+    {
+      "id": "midtruck",
+      "name": "Autobello Stambecco",
+      "skins": [
         {
-            "id": "bastion",
-            "name": "Bruckell Bastion"
-        },
-        {
-            "id": "vivace",
-            "name": "Cherrier Vivace"
-        },
-        {
-            "id": "etk800",
-            "name": "ETK 800 Series"
-        },
-        {
-            "id": "etkc",
-            "name": "ETK K-Series"
-        },
-        {
-            "id": "etki",
-            "name": "ETK I-Series"
-        },
-        {
-            "id": "200bx",
-            "name": "Ibishu 200BX"
-        },
-        {
-            "id": "covet",
-            "name": "Ibishu Covet"
-        },
-        {
-            "id": "hopper",
-            "name": "Ibishu Hopper"
-        },
-        {
-            "id": "miramar",
-            "name": "Ibishu Miramar"
-        },
-        {
-            "id": "pessima",
-            "name": "Ibishu Pessima"
-        },
-        {
-            "id": "pigeon",
-            "name": "Ibishu Pigeon"
-        },
-        {
-            "id": "sunburst",
-            "name": "Hirochi Sunburst"
-        },
-        {
-            "id": "sbr",
-            "name": "Hirochi SBR4"
-        },
-        {
-            "id": "bolide",
-            "name": "Civetta Bolide"
-        },
-        {
-            "id": "scintilla",
-            "name": "Civetta Scintilla"
-        },
-        {
-            "id": "barstow",
-            "name": "Gavril Barstow"
-        },
-        {
-            "id": "bluebuck",
-            "name": "Gavril Bluebuck"
-        },
-        {
-            "id": "grandmarshal",
-            "name": "Gavril Grand Marshal"
-        },
-        {
-            "id": "roamer",
-            "name": "Gavril Roamer"
-        },
-        {
-            "id": "pickup",
-            "name": "Gavril D-Series"
-        },
-        {
-            "id": "van",
-            "name": "Gavril H-Series"
-        },
-        {
-            "id": "tseries",
-            "name": "Gavril T-Series"
-        },
-        {
-            "id": "burnside",
-            "name": "Burnside Special"
-        },
-        {
-            "id": "fullsize",
-            "name": "Bruckell Moonhawk"
-        },
-        {
-            "id": "legran",
-            "name": "Bruckell LeGran"
-        },
-        {
-            "id": "wendover",
-            "name": "Soliad Wendover"
+          "name": "Ambulance Box",
+          "file": "skinnameambulance.dds"
         }
-    ]
+      ]
+    },
+    {
+      "id": "bastion",
+      "name": "Bruckell Bastion"
+    },
+    {
+      "id": "legran",
+      "name": "Bruckell LeGran"
+    },
+    {
+      "id": "moonhawk",
+      "name": "Bruckell Moonhawk"
+    },
+    {
+      "id": "nine",
+      "name": "Bruckell Nine"
+    },
+    {
+      "id": "burnside",
+      "name": "Burnside Special"
+    },
+    {
+      "id": "cargotrailer",
+      "name": "Cargo Trailer"
+    },
+    {
+      "id": "vivace",
+      "name": "Cherrier Vivace"
+    },
+    {
+      "id": "bolide",
+      "name": "Civetta Bolide"
+    },
+    {
+      "id": "scintilla",
+      "name": "Civetta Scintilla"
+    },
+    {
+      "id": "dryvan",
+      "name": "Dry Van Trailer"
+    },
+    {
+      "id": "etk800",
+      "name": "ETK 800 Series"
+    },
+    {
+      "id": "etki",
+      "name": "ETK I-Series"
+    },
+    {
+      "id": "etkc",
+      "name": "ETK K-Series"
+    },
+    {
+      "id": "barstow",
+      "name": "Gavril Barstow"
+    },
+    {
+      "id": "bluebuck",
+      "name": "Gavril Bluebuck"
+    },
+    {
+      "id": "pickup",
+      "name": "Gavril D-Series",
+      "skins": [
+        {
+          "name": "Ambulance Box",
+          "file": "SKINNAMEAMBULANCE.dds"
+        }
+      ]
+    },
+    {
+      "id": "fullsize",
+      "name": "Gavril Grand Marshal"
+    },
+    {
+      "id": "van",
+      "name": "Gavril H-Series",
+      "skins": [
+        {
+          "name": "Ambulance Body",
+          "file": "SKINNAMEAMB.dds"
+        },
+        {
+          "name": "Cargo Box",
+          "file": "SKINNAMEBOX.dds"
+        }
+      ]
+    },
+    {
+      "id": "md_series",
+      "name": "Gavril MD-Series",
+      "skins": [
+        {
+          "name": "Ambulance Box",
+          "file": "skinnameambulance.dds"
+        },
+        {
+          "name": "Cargo Box",
+          "file": "skinnamebox.dds"
+        },
+        {
+          "name": "Tanker",
+          "file": "skinnametanker.dds"
+        }
+      ]
+    },
+    {
+      "id": "roamer",
+      "name": "Gavril Roamer"
+    },
+    {
+      "id": "us_semi",
+      "name": "Gavril T-Series",
+      "skins": [
+        {
+          "name": "Cargo Box",
+          "file": "skinnamenobox.dds"
+        }
+      ]
+    },
+    {
+      "id": "utv",
+      "name": "Hirochi Aurata"
+    },
+    {
+      "id": "sbr",
+      "name": "Hirochi SBR4"
+    },
+    {
+      "id": "sunburst2",
+      "name": "Hirochi Sunburst"
+    },
+    {
+      "id": "atv",
+      "name": "Ibishu ATV"
+    },
+    {
+      "id": "bx",
+      "name": "Ibishu BX-Series"
+    },
+    {
+      "id": "covet",
+      "name": "Ibishu Covet"
+    },
+    {
+      "id": "hopper",
+      "name": "Ibishu Hopper"
+    },
+    {
+      "id": "miramar",
+      "name": "Ibishu Miramar"
+    },
+    {
+      "id": "pessima",
+      "name": "Ibishu Pessima 1st Gen"
+    },
+    {
+      "id": "midsize",
+      "name": "Ibishu Pessima 2st Gen"
+    },
+    {
+      "id": "pigeon",
+      "name": "Ibishu Pigeon"
+    },
+    {
+      "id": "wigeon",
+      "name": "Ibishu Wigeon"
+    },
+    {
+      "id": "lansdale",
+      "name": "Soliad Lansdale"
+    },
+    {
+      "id": "wendover",
+      "name": "Soliad Wendover"
+    },
+    {
+      "id": "racetruck",
+      "name": "SP Dunekicker"
+    },
+    {
+      "id": "rockbouncer",
+      "name": "SP Rock Bouncer"
+    },
+    {
+      "id": "citybus",
+      "name": "Wentward DT40L"
+    }
+  ]
 }

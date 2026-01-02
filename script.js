@@ -439,15 +439,26 @@ class LiveryEditor {
 
     initEvents() {
         // Navbar
-        document.getElementById('vehicle-select').addEventListener('change', (e) => {
+        document.getElementById('vehicle-select').addEventListener('change', async (e) => {
             const vehicle = e.target.value;
             if (vehicle) {
-                // Try to load standard skin name. Most vehicles use 'skinname.dds', some use 'SKINNAME.dds'
-                // This is a heuristic. We'll try lowercase first.
-                this.loadSkin(`Assets/vehicles/${vehicle}/skinname.dds`);
+                // Visual feedback
+                const skinSel = document.getElementById('skin-select');
+                skinSel.innerHTML = '<option>Detecting...</option>';
+                skinSel.disabled = true;
+
+                // Auto-detect correct path (Lower vs Upper)
+                const bestPath = await this.detectBestSkinPath(vehicle);
+
+                // Populate dropdown with the verified path
+                this.populateSkins(vehicle, bestPath);
+
+                // Load it
+                this.loadBaseSkin(bestPath);
             }
         });
         document.getElementById('skin-select').addEventListener('change', (e) => {
+            // This is now mostly redundant if we auto-load, but good for manual re-selection
             if (e.target.value) this.loadBaseSkin(e.target.value);
         });
         document.getElementById('base-upload').addEventListener('change', (e) => this.handleBaseUpload(e));
@@ -1695,36 +1706,92 @@ class LiveryEditor {
         }
     }
 
-    populateSkins(vehicle) {
+    async detectBestSkinPath(vehicle) {
+        const lower = `Assets/vehicles/${vehicle}/skinname.dds`;
+        const upper = `Assets/vehicles/${vehicle}/SKINNAME.dds`;
+
+        try {
+            // Check lowercase first
+            const resLower = await fetch(lower, { method: 'HEAD' });
+            if (resLower.ok) return lower;
+
+            // Check uppercase
+            const resUpper = await fetch(upper, { method: 'HEAD' });
+            if (resUpper.ok) return upper;
+        } catch (e) {
+            console.warn("Skin auto-detection failed, defaulting to lowercase", e);
+        }
+        return lower; // Default fallback
+    }
+
+    populateSkins(vehicle, selectedPath) {
         const sel = document.getElementById('skin-select');
-        sel.innerHTML = '<option value="">-- Select Template --</option>';
+        sel.innerHTML = '';
         sel.disabled = false;
-        if (this.manifest && this.manifest[vehicle]) {
-            this.manifest[vehicle].forEach(skin => {
-                const opt = document.createElement('option');
-                opt.value = skin.path; opt.innerText = skin.name;
-                sel.appendChild(opt);
-            });
+
+        // Add the main detected option
+        const opt = document.createElement('option');
+        opt.value = selectedPath;
+        opt.innerText = "Standard Template";
+        sel.appendChild(opt);
+
+        // Check manifest for extra skins (e.g. Ambulance, Cargo Box, etc.)
+        if (this.manifest && this.manifest.vehicles) {
+            const vehicleData = this.manifest.vehicles.find(v => v.id === vehicle);
+            if (vehicleData && vehicleData.skins) {
+                vehicleData.skins.forEach(s => {
+                    const extraOpt = document.createElement('option');
+                    extraOpt.value = `Assets/vehicles/${vehicle}/${s.file}`;
+                    extraOpt.innerText = s.name;
+                    sel.appendChild(extraOpt);
+                });
+            }
         }
     }
 
     async loadBaseSkin(path) {
         try {
-            const response = await fetch(path);
+            let response = await fetch(path);
+
+            // Fallback: If lowercase failed, try uppercase (for GitHub Pages/Linux)
+            if (!response.ok && path.includes('skinname.dds')) {
+                const altPath = path.replace('skinname.dds', 'SKINNAME.dds');
+                response = await fetch(altPath);
+            }
+
+            // Fallback 2: If uppercase failed (and we started with uppercase), try lowercase 'skinname.dds'
+            if (!response.ok && path.includes('SKINNAME.dds')) {
+                const altPath = path.replace('SKINNAME.dds', 'skinname.dds');
+                response = await fetch(altPath);
+            }
+
+            if (!response.ok) {
+                console.error(`Failed to load skin: ${path} (Status: ${response.status})`);
+                throw new Error(`Template file not found. Ensure the Assets/vehicles/${path.split('/')[2]} folder contains 'skinname.dds' or 'SKINNAME.dds'.`);
+            }
+
             const buffer = await response.arrayBuffer();
-            const ddsData = DDSDecoder.decode(buffer);
-            const imageData = new ImageData(ddsData.data, ddsData.width, ddsData.height);
 
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = ddsData.width;
-            tempCanvas.height = ddsData.height;
-            tempCanvas.getContext('2d').putImageData(imageData, 0, 0);
+            // Decode DDS
+            try {
+                const ddsData = DDSDecoder.decode(buffer);
+                const imageData = new ImageData(ddsData.data, ddsData.width, ddsData.height);
 
-            const img = new Image();
-            img.src = tempCanvas.toDataURL();
-            img.onload = () => this.setBaseLayer(img);
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = ddsData.width;
+                tempCanvas.height = ddsData.height;
+                tempCanvas.getContext('2d').putImageData(imageData, 0, 0);
+
+                const img = new Image();
+                img.src = tempCanvas.toDataURL();
+                img.onload = () => this.setBaseLayer(img);
+            } catch (decodeErr) {
+                console.error("DDS Decode Error:", decodeErr);
+                throw new Error("Unsupported Texture Format. \n\nThe file exists but uses modern BC7 compression (which browsers can't read). \n\nPlease convert this skin to DXT5 (BC3) format using paint.net or Photoshop and upload it manually.");
+            }
+
         } catch (e) {
-            alert("Error loading skin: " + e.message);
+            alert("Error: " + e.message);
         }
     }
 

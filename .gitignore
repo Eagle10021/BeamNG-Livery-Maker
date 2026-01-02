@@ -8,3 +8,5 @@ dist/
 build/
 temp/
 *.dds.tmp
+check_dds.js
+check_dds.py
