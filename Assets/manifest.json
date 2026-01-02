@@ -1,282 +1,108 @@
 {
-  "atv": [
+  "vehicles": [
     {
-      "name": "skinname",
-      "path": "assets/vehicles/atv/skinname.dds"
-    }
-  ],
-  "autobello": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/autobello/SKINNAME.dds"
-    }
-  ],
-  "barstow": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/barstow/SKINNAME.dds"
-    }
-  ],
-  "bastion": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/bastion/SKINNAME.dds"
-    }
-  ],
-  "bluebuck": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/bluebuck/SKINNAME.dds"
-    }
-  ],
-  "bolide": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/bolide/SKINNAME.dds"
-    }
-  ],
-  "burnside": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/burnside/SKINNAME.dds"
-    }
-  ],
-  "bx": [
-    {
-      "name": "skinname",
-      "path": "assets/vehicles/bx/skinname.dds"
-    }
-  ],
-  "cargotrailer": [
-    {
-      "name": "skinname",
-      "path": "assets/vehicles/cargotrailer/skinname.dds"
-    }
-  ],
-  "citybus": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/citybus/SKINNAME.dds"
-    }
-  ],
-  "covet": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/covet/SKINNAME.dds"
-    }
-  ],
-  "dryvan": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/dryvan/SKINNAME.dds"
-    }
-  ],
-  "etk800": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/etk800/SKINNAME.dds"
-    }
-  ],
-  "etkc": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/etkc/SKINNAME.dds"
-    }
-  ],
-  "etki": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/etki/SKINNAME.dds"
-    }
-  ],
-  "fullsize": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/fullsize/SKINNAME.dds"
-    }
-  ],
-  "hopper": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/hopper/SKINNAME.dds"
-    }
-  ],
-  "lansdale": [
-    {
-      "name": "skinname",
-      "path": "assets/vehicles/lansdale/skinname.dds"
-    }
-  ],
-  "legran": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/legran/SKINNAME.dds"
-    }
-  ],
-  "md_series": [
-    {
-      "name": "skinname",
-      "path": "assets/vehicles/md_series/skinname.dds"
+      "id": "bastion",
+      "name": "Bruckell Bastion"
     },
     {
-      "name": "skinnameambulance",
-      "path": "assets/vehicles/md_series/skinnameambulance.dds"
+      "id": "vivace",
+      "name": "Cherrier Vivace"
     },
     {
-      "name": "skinnamearmor",
-      "path": "assets/vehicles/md_series/skinnamearmor.dds"
+      "id": "etk800",
+      "name": "ETK 800 Series"
     },
     {
-      "name": "skinnamebox",
-      "path": "assets/vehicles/md_series/skinnamebox.dds"
+      "id": "etkc",
+      "name": "ETK K-Series"
     },
     {
-      "name": "skinnamebus",
-      "path": "assets/vehicles/md_series/skinnamebus.dds"
-    }
-  ],
-  "midsize": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/midsize/SKINNAME.dds"
-    }
-  ],
-  "midtruck": [
-    {
-      "name": "skinname",
-      "path": "assets/vehicles/midtruck/skinname.dds"
+      "id": "etki",
+      "name": "ETK I-Series"
     },
     {
-      "name": "skinnameambulance",
-      "path": "assets/vehicles/midtruck/skinnameambulance.dds"
-    }
-  ],
-  "miramar": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/miramar/SKINNAME.dds"
-    }
-  ],
-  "moonhawk": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/moonhawk/SKINNAME.dds"
-    }
-  ],
-  "nine": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/nine/SKINNAME.dds"
-    }
-  ],
-  "pessima": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/pessima/SKINNAME.dds"
-    }
-  ],
-  "pickup": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/pickup/SKINNAME.dds"
+      "id": "200bx",
+      "name": "Ibishu 200BX"
     },
     {
-      "name": "SKINNAMEAMBULANCE",
-      "path": "assets/vehicles/pickup/SKINNAMEAMBULANCE.dds"
+      "id": "covet",
+      "name": "Ibishu Covet"
     },
     {
-      "name": "SKINNAMEBOX",
-      "path": "assets/vehicles/pickup/SKINNAMEBOX.dds"
-    }
-  ],
-  "pigeon": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/pigeon/SKINNAME.dds"
-    }
-  ],
-  "racetruck": [
-    {
-      "name": "skinname",
-      "path": "assets/vehicles/racetruck/skinname.dds"
-    }
-  ],
-  "roamer": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/roamer/SKINNAME.dds"
-    }
-  ],
-  "rockbouncer": [
-    {
-      "name": "skinname",
-      "path": "assets/vehicles/rockbouncer/skinname.dds"
-    }
-  ],
-  "sbr": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/sbr/SKINNAME.dds"
-    }
-  ],
-  "scintilla": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/scintilla/SKINNAME.dds"
-    }
-  ],
-  "sunburst2": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/sunburst2/SKINNAME.dds"
-    }
-  ],
-  "us_semi": [
-    {
-      "name": "skinname",
-      "path": "assets/vehicles/us_semi/skinname.dds"
+      "id": "hopper",
+      "name": "Ibishu Hopper"
     },
     {
-      "name": "skinnamenobox",
-      "path": "assets/vehicles/us_semi/skinnamenobox.dds"
-    }
-  ],
-  "utv": [
-    {
-      "name": "skinname",
-      "path": "assets/vehicles/utv/skinname.dds"
-    }
-  ],
-  "van": [
-    {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/van/SKINNAME.dds"
+      "id": "miramar",
+      "name": "Ibishu Miramar"
     },
     {
-      "name": "SKINNAMEAMB",
-      "path": "assets/vehicles/van/SKINNAMEAMB.dds"
+      "id": "pessima",
+      "name": "Ibishu Pessima"
     },
     {
-      "name": "SKINNAMEBOX",
-      "path": "assets/vehicles/van/SKINNAMEBOX.dds"
-    }
-  ],
-  "vivace": [
+      "id": "pigeon",
+      "name": "Ibishu Pigeon"
+    },
     {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/vivace/SKINNAME.dds"
-    }
-  ],
-  "wendover": [
+      "id": "sunburst",
+      "name": "Hirochi Sunburst"
+    },
     {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/wendover/SKINNAME.dds"
-    }
-  ],
-  "wigeon": [
+      "id": "sbr",
+      "name": "Hirochi SBR4"
+    },
     {
-      "name": "SKINNAME",
-      "path": "assets/vehicles/wigeon/SKINNAME.dds"
+      "id": "bolide",
+      "name": "Civetta Bolide"
+    },
+    {
+      "id": "scintilla",
+      "name": "Civetta Scintilla"
+    },
+    {
+      "id": "barstow",
+      "name": "Gavril Barstow"
+    },
+    {
+      "id": "bluebuck",
+      "name": "Gavril Bluebuck"
+    },
+    {
+      "id": "grandmarshal",
+      "name": "Gavril Grand Marshal"
+    },
+    {
+      "id": "roamer",
+      "name": "Gavril Roamer"
+    },
+    {
+      "id": "pickup",
+      "name": "Gavril D-Series"
+    },
+    {
+      "id": "van",
+      "name": "Gavril H-Series"
+    },
+    {
+      "id": "tseries",
+      "name": "Gavril T-Series"
+    },
+    {
+      "id": "burnside",
+      "name": "Burnside Special"
+    },
+    {
+      "id": "fullsize",
+      "name": "Bruckell Moonhawk"
+    },
+    {
+      "id": "legran",
+      "name": "Bruckell LeGran"
+    },
+    {
+      "id": "wendover",
+      "name": "Soliad Wendover"
     }
   ]
 }
