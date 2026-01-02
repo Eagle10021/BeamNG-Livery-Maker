@@ -1,0 +1,672 @@
+:root {
+    --bg-color: #121214;
+    --surface-color: #1e1e21;
+    --surface-hover: #29292e;
+    --primary-color: #5e6670;
+    --accent-color: #f97316;
+    --accent-glow: rgba(249, 115, 22, 0.4);
+    --text-primary: #f4f4f7;
+    --text-secondary: #a1a1aa;
+    --border-color: #27272a;
+    --radius: 8px;
+    --header-height: 52px;
+    --panel-width: 290px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+    user-select: none;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-size: 13px;
+    /* Smaller, pro density */
+}
+
+/* Header */
+header {
+    height: var(--header-height);
+    background: #18181b;
+    border-bottom: 1px solid #000;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    justify-content: space-between;
+    z-index: 20;
+}
+
+.logo {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.9;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+button {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+button:hover {
+    background: var(--surface-hover);
+    border-color: #52525b;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button.primary {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    border: none;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 4px 15px -5px var(--accent-glow);
+}
+
+button.primary:hover {
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+    box-shadow: 0 8px 25px -5px var(--accent-glow);
+}
+
+button.guide-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 4px 15px -5px rgba(59, 130, 246, 0.4);
+}
+
+button.guide-btn:hover {
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    box-shadow: 0 8px 25px -5px rgba(59, 130, 246, 0.4);
+}
+
+button.icon-btn {
+    padding: 6px;
+    width: 28px;
+    height: 28px;
+    justify-content: center;
+}
+
+/* Main Layout */
+.app-container {
+    display: flex;
+    /* Changed from grid to flex for collapse behavior */
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Toolbar Strip */
+.toolbar-strip {
+    width: 48px;
+    background: #202020;
+    border-right: 1px solid #111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 8px;
+    z-index: 15;
+}
+
+.tool-btn {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    /* Reset global button padding */
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tool-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.tool-btn:hover {
+    background: #333;
+    color: #fff;
+}
+
+.tool-btn.active {
+    background: #f97316;
+    color: #fff;
+}
+
+/* Panels */
+.panel {
+    width: var(--panel-width);
+    background: var(--surface-color);
+    border-right: 1px solid #000;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    z-index: 10;
+}
+
+.panel-right {
+    border-right: none;
+    border-left: 1px solid #000;
+}
+
+.panel.collapsed {
+    width: 0;
+    border: none;
+    /* Do NOT hide overflow generally, or toggle button disappears. 
+       Instead hide content specifically. */
+}
+
+.panel-content {
+    padding: 12px;
+    overflow-y: auto;
+    flex: 1;
+    min-width: var(--panel-width);
+    /* Prevent content squishing during transition */
+    /* Hide content when collapsed */
+    transition: opacity 0.2s;
+}
+
+.panel.collapsed .panel-content {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Collapse Toggles */
+.panel-toggle {
+    position: absolute;
+    top: 50%;
+    width: 20px;
+    /* Bit wider */
+    height: 48px;
+    background: var(--surface-color);
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    /* Ensure on top */
+    font-size: 10px;
+    color: var(--text-secondary);
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    /* Pop out */
+    border-radius: 4px;
+}
+
+.panel-toggle:hover {
+    background: var(--accent-color);
+    color: #fff;
+}
+
+.toggle-left {
+    right: -20px;
+    /* Push out */
+    border-left: 1px solid #000;
+    border-radius: 0 4px 4px 0;
+}
+
+.toggle-right {
+    left: -20px;
+    border-right: 1px solid #000;
+    border-radius: 4px 0 0 4px;
+}
+
+.panel-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin: 16px 0 8px 0;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-title:first-child {
+    margin-top: 0;
+}
+
+/* Workspace */
+.workspace {
+    flex: 1;
+    position: relative;
+    background: #121212;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#canvas-container {
+    /* Container is now virtual/transform based, handled by canvas draw mostly */
+    /* We just ensure canvas block display */
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    display: block;
+    /* No box shadow by default, rendered inside canvas */
+}
+
+/* Controls Styles */
+.control-row {
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 4px;
+    background: #1c1c1c;
+    border-radius: 2px;
+    appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #b0b0b0;
+    cursor: pointer;
+    border: 1px solid #000;
+}
+
+input[type="number"],
+input[type="text"],
+select {
+    width: 100%;
+    background: #18181b;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 8px;
+    border-radius: var(--radius);
+    font-size: 11px;
+    font-family: inherit;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus,
+select:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    background: #202024;
+}
+
+select option {
+    background: #18181b;
+    color: #fff;
+}
+
+/* Layer List */
+.layer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.layer-item {
+    background: #2b2b2b;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    /* Reserve space for border */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.layer-item:hover {
+    background: #333;
+}
+
+.layer-item.active {
+    background: #3e4854;
+    /* Cool blue-grey for active */
+    border: 1px solid #5a6675;
+}
+
+.layer-name {
+    font-size: 11px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.layer-visibility {
+    margin-right: 8px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    cursor: pointer;
+}
+
+.layer-visibility:hover {
+    opacity: 1;
+}
+
+.layer-item.hidden {
+    opacity: 0.4;
+}
+
+.layer-rename-input {
+    background: #18181b;
+    border: 1px solid var(--accent-color);
+    border-radius: 2px;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 4px;
+    width: 100%;
+    outline: none;
+}
+
+.layer-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    /* controlled by inline style */
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+.modal-content {
+    background: #2b2b2b;
+    border: 1px solid #444;
+    width: 600px;
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    background: #222;
+    padding: 12px 16px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #ccc;
+}
+
+.modal-body h3 {
+    margin: 16px 0 8px 0;
+    color: var(--accent-color);
+    font-size: 14px;
+}
+
+.modal-body h3:first-child {
+    margin-top: 0;
+}
+
+.modal-body h4 {
+    margin: 12px 0 6px 0;
+    color: #fff;
+    font-size: 13px;
+}
+
+.modal-body pre {
+    background: #111;
+    border: 1px solid #333;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: 'Consolas', monospace;
+    font-size: 11px;
+    color: #a8b1be;
+    margin-bottom: 10px;
+}
+
+.tip-box {
+    background: rgba(249, 115, 22, 0.1);
+    border-left: 3px solid var(--accent-color);
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Tooltips */
+.tooltip-container {
+    position: relative;
+    display: inline-flex;
+}
+
+.tooltip {
+    visibility: hidden;
+    width: 200px;
+    background-color: #222;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1000;
+    top: 150%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 11px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border: 1px solid #444;
+    line-height: 1.4;
+    font-weight: 400;
+}
+
+.tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #222 transparent;
+}
+
+.tooltip-container:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Context Menu */
+.context-menu {
+    position: fixed;
+    background: #2b2b2b;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 4px;
+    min-width: 180px;
+    z-index: 2000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-item {
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #e5e5e5;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu-item:hover {
+    background: #f97316;
+    color: #fff;
+}
+
+.menu-item:hover span {
+    color: #fff !important;
+}
+
+.menu-divider {
+    height: 1px;
+    background: #333;
+    margin: 4px 0;
+}
+
+.shortcut {
+    color: #888;
+    font-size: 10px;
+}
+
+/* Layer Drag and Drop */
+.layer-item.dragging {
+    opacity: 0.5;
+}
+
+.layer-item.drag-over {
+    border-top: 2px solid #f97316;
+}
+
+.layer-item.multi-selected {
+    background: rgba(96, 165, 250, 0.2);
+    border-left: 3px solid #60a5fa;
+}
+
+/* Flyout Menu */
+.flyout-menu {
+    position: absolute;
+    left: 48px;
+    top: 0;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1000;
+}
+
+.flyout-menu.show {
+    display: block;
+    animation: flyoutIn 0.2s ease-out;
+}
+
+@keyframes flyoutIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.flyout-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+}
+
+.flyout-item {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #888;
+    transition: all 0.2s;
+}
+
+.flyout-item:hover {
+    background: #333;
+    color: #fff;
+}
+
+.flyout-item svg {
+    width: 18px;
+    height: 18px;
+}

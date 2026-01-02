@@ -1,0 +1,14 @@
+{
+  "name": "beamng-livery-maker",
+  "version": "1.0.0",
+  "description": "Livery Maker for BeamNG",
+  "scripts": {
+    "build:assets": "node scripts/import-assets.js"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
