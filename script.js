@@ -410,10 +410,28 @@ class LiveryEditor {
 
     updateCanvasDisplaySize() {
         const container = document.getElementById('canvas-container');
-        this.canvas.width = container.clientWidth;
-        this.canvas.height = container.clientHeight;
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
+        const dpr = window.devicePixelRatio || 1;
+
+        // precise width/height from DOM
+        const rect = container.getBoundingClientRect();
+
+        // set internal resolution
+        this.canvas.width = Math.round(rect.width * dpr);
+        this.canvas.height = Math.round(rect.height * dpr);
+
+        // set CSS display size
+        this.canvas.style.width = `${rect.width}px`;
+        this.canvas.style.height = `${rect.height}px`;
+
+        // Ensure crisp rendering
+        this.ctx.imageSmoothingEnabled = false;
+
+        // Normalize coordinate system to use CSS pixels
+        // this.ctx.scale(dpr, dpr); // We don't scale here because we manage transform in render() 
+        // Actually, for crisp rendering, we should handle the scale in the render loop or here.
+        // In this app, we do `ctx.setTransform` in render(), so we can't just scale here.
+        // We will handle dpr in render().
+
         this.render();
     }
 
@@ -436,8 +454,11 @@ class LiveryEditor {
     }
 
     updateZoomDisplay() {
+        const percentage = Math.round(this.view.zoom * 100);
         const el = document.getElementById('zoom-level');
-        if (el) el.innerText = Math.round(this.view.zoom * 100) + '%';
+        if (el) el.innerText = percentage + '%';
+        const slider = document.getElementById('canvas-zoom-slider');
+        if (slider) slider.value = percentage;
     }
 
     initEvents() {
@@ -660,6 +681,37 @@ class LiveryEditor {
 
         // Global Paste (for external images)
         window.addEventListener('paste', (e) => this.handlePaste(e));
+
+        // Help Button
+        const helpBtn = document.getElementById('help-btn');
+        if (helpBtn) helpBtn.addEventListener('click', () => {
+            document.getElementById('help-modal').style.display = 'flex';
+        });
+
+        // Zoom Slider
+        const zoomSlider = document.getElementById('canvas-zoom-slider');
+        if (zoomSlider) {
+            zoomSlider.addEventListener('input', (e) => {
+                const percentage = parseInt(e.target.value);
+                const newZoom = percentage / 100;
+
+                // Calculate center point in virtual space
+                const container = document.getElementById('canvas-container');
+                const centerX = container.clientWidth / 2;
+                const centerY = container.clientHeight / 2;
+
+                const virtCenter = this.screenToVirtual(centerX, centerY);
+
+                this.view.zoom = newZoom;
+
+                // Recenter
+                this.view.x = centerX - virtCenter.x * newZoom;
+                this.view.y = centerY - virtCenter.y * newZoom;
+
+                this.updateZoomDisplay();
+                this.render();
+            });
+        }
 
         document.getElementById('undo-btn').addEventListener('click', () => this.undo());
         document.getElementById('redo-btn').addEventListener('click', () => this.redo());
@@ -1286,8 +1338,17 @@ class LiveryEditor {
 
     // --- Rendering ---
     render() {
+        // Reset transform to identity (but scaled by DPR) for clearing
+        const dpr = window.devicePixelRatio || 1;
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
         this.ctx.save();
+        // Apply DPR scaling usually via setTransform
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        this.ctx.imageSmoothingEnabled = false; // Always crisp
+
+        // Then apply view transform
         this.ctx.translate(this.view.x, this.view.y);
         this.ctx.scale(this.view.zoom, this.view.zoom);
 

@@ -94,7 +94,14 @@
         </div>
 
         <div class="header-right">
-
+            <button class="icon-btn" id="help-btn" title="Shortcuts & Help (?)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </button>
+            <div style="width: 1px; height: 16px; background: #333; margin: 0 4px;"></div>
 
             <a href="guide.html" target="_blank" style="text-decoration: none;">
                 <button class="guide-btn">
@@ -171,22 +178,76 @@
 
                 <div class="panel-title">Layer Transform</div>
                 <div id="properties-panel">
-                    <!-- Color picker removed as per user request to use universal color -->
-
-
                     <div class="control-row">
                         <label>Opacity <span>%</span></label>
                         <input type="range" id="prop-opacity" min="0" max="100" value="100">
                     </div>
 
                     <div class="control-row">
-                        <label>Mirror</label>
+                        <label>Flip</label>
                         <div style="display: flex; gap: 4px;">
                             <button id="btn-flip-h" style="flex:1; justify-content: center; font-size: 10px;">Flip
                                 H</button>
                             <button id="btn-flip-v" style="flex:1; justify-content: center; font-size: 10px;">Flip
                                 V</button>
                         </div>
+                    </div>
+
+                    <div class="panel-title" style="margin-left:0; font-size:11px; margin-top:20px;">Transform</div>
+
+                    <div class="control-row">
+                        <label>Linked Mirror</label>
+                        <div style="display: flex; gap: 4px;">
+                            <button id="btn-mirror-h" style="flex:1; justify-content: center; font-size: 10px;">Mirror
+                                H</button>
+                            <button id="btn-mirror-v" style="flex:1; justify-content: center; font-size: 10px;">Mirror
+                                V</button>
+                        </div>
+                    </div>
+
+                    <div class="control-row">
+                        <label>Zoom (Layer Scale)</label>
+                        <input type="number" id="prop-scale" step="0.1" value="1">
+                    </div>
+
+                    <div class="control-row">
+                        <label>Rotation <span>deg</span></label>
+                        <div style="display:flex; gap:4px">
+                            <input type="range" id="prop-rotation-slider" min="-180" max="180" value="0" style="flex:1">
+                            <input type="number" id="prop-rotation" value="0" min="-180" max="180" style="width: 50px;">
+                        </div>
+                    </div>
+
+                    <div class="panel-title">Filters</div>
+                    <div class="control-row">
+                        <label>Hue</label>
+                        <input type="range" id="prop-hue" min="-180" max="180" value="0">
+                    </div>
+                    <div class="control-row">
+                        <label>Saturation</label>
+                        <input type="range" id="prop-saturation" min="0" max="200" value="100">
+                    </div>
+                    <div class="control-row">
+                        <label>Brightness</label>
+                        <input type="range" id="prop-brightness" min="0" max="200" value="100">
+                    </div>
+
+                    <div class="control-row" style="margin-top: 16px; margin-bottom: 8px;">
+                        <button id="rasterize-layer-btn"
+                            style="width: 100%; justify-content: center; background: #3b82f633; border-color: #3b82f666; color: #93c5fd; font-size: 11px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" style="margin-right: 4px;">
+                                <path d="M12 2v20M2 12h20"></path>
+                            </svg>
+                            Rasterize to Tattoo
+                        </button>
+                    </div>
+
+                    <div class="control-row">
+                        <button id="delete-layer-btn"
+                            style="width: 100%; justify-content: center; background: #3f1d1d; border-color: #5c2b2b; color: #ef9a9a;">
+                            Delete Selected
+                        </button>
                     </div>
 
                     <div id="path-settings"
@@ -233,62 +294,6 @@
                                 <input type="number" id="prop-text-curve-num" value="0" style="width: 50px;">
                             </div>
                         </div>
-                    </div>
-
-                    <div class="panel-title" style="margin-left:0; font-size:11px; margin-top:15px;">Transform</div>
-                    <div class="control-row">
-                        <label>Linked Mirror</label>
-                        <div style="display: flex; gap: 4px;">
-                            <button id="btn-mirror-h" style="flex:1; justify-content: center; font-size: 10px;">Mirror
-                                H</button>
-                            <button id="btn-mirror-v" style="flex:1; justify-content: center; font-size: 10px;">Mirror
-                                V</button>
-                        </div>
-                    </div>
-
-                    <!-- User requested Scale be renamed to "Zoom" -->
-                    <div class="control-row">
-                        <label>Zoom (Layer Scale)</label>
-                        <input type="number" id="prop-scale" step="0.1" value="1">
-                    </div>
-                    <div class="control-row">
-                        <label>Rotation <span>deg</span></label>
-                        <div style="display:flex; gap:4px">
-                            <input type="range" id="prop-rotation-slider" min="-180" max="180" value="0" style="flex:1">
-                            <input type="number" id="prop-rotation" value="0" min="-180" max="180" style="width: 50px;">
-                        </div>
-                    </div>
-
-                    <div class="panel-title">Filters</div>
-                    <div class="control-row">
-                        <label>Hue</label>
-                        <input type="range" id="prop-hue" min="-180" max="180" value="0">
-                    </div>
-                    <div class="control-row">
-                        <label>Saturation</label>
-                        <input type="range" id="prop-saturation" min="0" max="200" value="100">
-                    </div>
-                    <div class="control-row">
-                        <label>Brightness</label>
-                        <input type="range" id="prop-brightness" min="0" max="200" value="100">
-                    </div>
-
-                    <div class="control-row" style="margin-top: 16px; margin-bottom: 8px;">
-                        <button id="rasterize-layer-btn"
-                            style="width: 100%; justify-content: center; background: #3b82f633; border-color: #3b82f666; color: #93c5fd; font-size: 11px;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" style="margin-right: 4px;">
-                                <path d="M12 2v20M2 12h20"></path>
-                            </svg>
-                            Rasterize to Tattoo
-                        </button>
-                    </div>
-
-                    <div class="control-row">
-                        <button id="delete-layer-btn"
-                            style="width: 100%; justify-content: center; background: #3f1d1d; border-color: #5c2b2b; color: #ef9a9a;">
-                            Delete Selected
-                        </button>
                     </div>
                 </div>
             </div>
@@ -538,19 +543,7 @@
             </div>
 
             <!-- Floating View Controls -->
-            <div
-                style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2b2b2b; border: 1px solid #1c1c1c; padding: 4px 8px; border-radius: 20px; display:flex; gap: 8px; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                <button class="icon-btn" id="reset-view-btn" title="Fit to Screen">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 3h6v6"></path>
-                        <path d="M9 21H3v-6"></path>
-                        <path d="M21 3l-7 7"></path>
-                        <path d="M3 21l7-7"></path>
-                    </svg>
-                </button>
-                <div style="width: 1px; height: 16px; background: #444;"></div>
-                <span style="font-size: 11px; color: #888;" id="zoom-level">100%</span>
-            </div>
+
         </main>
 
         <!-- Right Panel -->
@@ -613,6 +606,27 @@
                 <div class="layer-list" id="layer-list">
                     <!-- Layers will be populated here -->
                 </div>
+
+                <!-- Zoom Controls -->
+                <div id="zoom-controls-container"
+                    style="margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; flex-shrink: 0;">
+                    <div class="control-row">
+                        <label>Canvas Zoom <span id="zoom-level">100%</span></label>
+                        <div style="display:flex; gap:4px; align-items: center;">
+                            <input type="range" id="canvas-zoom-slider" min="10" max="400" value="100" style="flex:1">
+                            <button class="icon-btn" id="reset-view-btn" title="Fit to Screen"
+                                style="width: 24px; height: 24px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M15 3h6v6"></path>
+                                    <path d="M9 21H3v-6"></path>
+                                    <path d="M21 3l-7 7"></path>
+                                    <path d="M3 21l7-7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </aside>
     </div>
@@ -635,6 +649,60 @@
                     <button id="modal-text-cancel" style="flex: 1; justify-content: center;">Cancel</button>
                     <button id="modal-text-confirm" class="primary" style="flex: 1; justify-content: center;">Add
                         Text</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <h2>Shortcuts & Help</h2>
+                <button onclick="document.getElementById('help-modal').style.display='none'"
+                    style="background:transparent; border:none; color:#888; font-size:20px;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>Tools</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <div>Select / Move</div>
+                    <div><span class="shortcut">V</span></div>
+                    <div>Hand Tool</div>
+                    <div><span class="shortcut">H</span> / Space</div>
+                    <div>Brush</div>
+                    <div><span class="shortcut">B</span></div>
+                    <div>Eraser</div>
+                    <div><span class="shortcut">E</span></div>
+                    <div>Eyedropper</div>
+                    <div><span class="shortcut">I</span></div>
+                    <div>Text</div>
+                    <div><span class="shortcut">T</span></div>
+                    <div>Pen</div>
+                    <div><span class="shortcut">P</span></div>
+                </div>
+
+                <h3>Actions</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <div>Undo</div>
+                    <div><span class="shortcut">Ctrl+Z</span></div>
+                    <div>Redo</div>
+                    <div><span class="shortcut">Ctrl+Y</span></div>
+                    <div>Duplicate Layer</div>
+                    <div><span class="shortcut">Ctrl+D</span></div>
+                    <div>Delete Layer</div>
+                    <div><span class="shortcut">Del</span></div>
+                    <div>Copy Layer</div>
+                    <div><span class="shortcut">Ctrl+C</span></div>
+                    <div>Paste Layer</div>
+                    <div><span class="shortcut">Ctrl+V</span></div>
+                </div>
+
+                <h3>Navigation</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <div>Zoom</div>
+                    <div><span class="shortcut">Mouse Wheel</span></div>
+                    <div>Pan</div>
+                    <div><span class="shortcut">Space + Drag</span></div>
                 </div>
             </div>
         </div>

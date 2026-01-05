@@ -1,13 +1,18 @@
 :root {
-    --bg-color: #0c0c0e;
-    --surface-color: #18181b;
-    --surface-hover: #27272a;
+    --bg-color: #050505;
+    /* Darker */
+    --surface-color: #0a0a0a;
+    /* Darker */
+    --surface-hover: #1f1f22;
     --primary-color: #5e6670;
     --accent-color: #f97316;
     --accent-glow: rgba(249, 115, 22, 0.4);
-    --text-primary: #f4f4f7;
-    --text-secondary: #a1a1aa;
-    --border-color: #3f3f46;
+    --text-primary: #ffffff;
+    /* Brighter */
+    --text-secondary: #e0e0e0;
+    /* Brighter */
+    --border-color: #555555;
+    /* Higher contrast */
     --radius: 8px;
     --header-height: 52px;
     --panel-width: 290px;
@@ -35,8 +40,8 @@ body {
 /* Header */
 header {
     height: var(--header-height);
-    background: #18181b;
-    border-bottom: 1px solid #000;
+    background: #0a0a0a;
+    border-bottom: 1px solid #333;
     display: flex;
     align-items: center;
     padding: 0 16px;
@@ -130,6 +135,15 @@ button:hover {
 
 button:active {
     transform: translateY(0);
+}
+
+#livery-canvas {
+    transform-origin: 0 0;
+    /* Force crisp rendering */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 
 button.primary {
@@ -402,6 +416,14 @@ select option {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    flex: 1;
+    /* Grow to fill space */
+    overflow-y: auto;
+    /* Scroll internally */
+    min-height: 0;
+    /* Required for flex scrolling */
+    padding-right: 4px;
+    /* Space for scrollbar */
 }
 
 .layer-item {
