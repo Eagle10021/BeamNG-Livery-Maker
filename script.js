@@ -18,6 +18,9 @@ class LiveryEditor {
         this.isPanning = false;
         this.isPainting = false;
         this.isDrawingLine = false;
+        this.isDrawingGradient = false;
+        this.gradientStart = null;
+        this.gradientEnd = null;
         this.isDrawingPath = false;
         this.pathPoints = [];
         this.activePointIndex = -1;
@@ -519,6 +522,7 @@ class LiveryEditor {
         });
 
         document.getElementById('tool-fill').addEventListener('click', () => this.setTool('fill'));
+        document.getElementById('tool-gradient').addEventListener('click', () => this.setTool('gradient'));
         document.getElementById('tool-eyedropper').addEventListener('click', () => this.setTool('eyedropper'));
         document.getElementById('tool-text').addEventListener('click', () => this.setTool('text'));
         document.getElementById('tool-pen').addEventListener('click', () => this.setTool('pen'));
@@ -594,6 +598,11 @@ class LiveryEditor {
         updateProp('prop-brightness', 'brightness', parseInt);
         updateProp('prop-color', 'color');
         updateProp('prop-path-width', 'width', parseInt);
+        updateProp('prop-grad-start', 'colorStart');
+        updateProp('prop-grad-end', 'colorEnd');
+        updateProp('prop-grad-type', 'gradientType');
+        updateProp('prop-grad-angle', 'gradientAngle', parseInt);
+        updateProp('prop-grad-balance', 'gradientBalance', parseInt);
 
         const blendSelect = document.getElementById('prop-blend-mode');
         if (blendSelect) {
@@ -1040,6 +1049,13 @@ class LiveryEditor {
             return;
         }
 
+        if (this.currentTool === 'gradient') {
+            this.isDrawingGradient = true;
+            this.gradientStart = virtualPt;
+            this.gradientEnd = virtualPt;
+            return;
+        }
+
         // Line Tool - Start drawing line
         if (this.currentTool === 'line') {
             const layer = this.layers.find(l => l.id === this.activeLayerId);
@@ -1130,7 +1146,25 @@ class LiveryEditor {
         return { x: dx * cos - dy * sin, y: dx * sin + dy * cos };
     }
 
+    hexToRgb(hex) {
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 0, g: 0, b: 0 };
+    }
+
     handleMouseMove(e) {
+        if (this.isDrawingGradient) {
+            this.gradientEnd = this.getCanvasCoordinates(e);
+            this.render();
+            return;
+        }
+
         if (this.isPullingHandles && this.activeLayerId) {
             const layer = this.layers.find(l => l.id === this.activeLayerId);
             if (layer && layer.type === 'path' && this.activePointIndex !== -1) {
@@ -1306,6 +1340,51 @@ class LiveryEditor {
     }
 
     handleMouseUp(e) {
+        if (this.isDrawingGradient) {
+            this.isDrawingGradient = false;
+
+            try {
+                // Calculate Bounds (Box)
+                const minX = Math.min(this.gradientStart.x, this.gradientEnd.x);
+                const minY = Math.min(this.gradientStart.y, this.gradientEnd.y);
+                const w = Math.abs(this.gradientStart.x - this.gradientEnd.x);
+                const h = Math.abs(this.gradientStart.y - this.gradientEnd.y);
+
+                const width = Math.max(w, 50); // Minimum size
+                const height = Math.max(h, 50);
+                const cx = minX + width / 2;
+                const cy = minY + height / 2;
+
+                const layer = {
+                    id: Date.now(),
+                    type: 'gradient',
+                    name: 'Gradient Box',
+                    visible: true,
+                    locked: false,
+                    opacity: 1,
+                    blendMode: 'normal',
+                    gradientType: 'linear',
+                    gradientAngle: 90,
+                    // Ensure valid hex color
+                    colorStart: (this.brushColor && this.brushColor.startsWith('#')) ? this.brushColor : '#ffffff',
+                    colorEnd: (this.bgColor && this.bgColor.startsWith('#')) ? this.bgColor : '#000000',
+                    width: width,
+                    height: height,
+                    x: cx,
+                    y: cy,
+                    rotation: 0,
+                    scaleX: 1,
+                    scaleY: 1
+                };
+                this.addLayer(layer);
+            } catch (e) {
+                console.error("Gradient Error:", e);
+                alert("Failed to create gradient: " + e.message);
+            }
+            return;
+            return;
+        }
+
         // Complete line drawing
         if (this.isDrawingLine && this.lineStart) {
             const layer = this.layers.find(l => l.id === this.activeLayerId);
@@ -1383,6 +1462,21 @@ class LiveryEditor {
                 this.drawGizmos(this.ctx, layer);
             }
         }
+
+        if (this.isDrawingGradient && this.gradientStart && this.gradientEnd) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.gradientStart.x, this.gradientStart.y);
+            this.ctx.lineTo(this.gradientEnd.x, this.gradientEnd.y);
+            this.ctx.strokeStyle = '#d946ef';
+            this.ctx.lineWidth = 2 / this.view.zoom;
+            this.ctx.stroke();
+
+            this.ctx.fillStyle = '#fff';
+            this.ctx.beginPath();
+            this.ctx.arc(this.gradientStart.x, this.gradientStart.y, 4 / this.view.zoom, 0, Math.PI * 2);
+            this.ctx.arc(this.gradientEnd.x, this.gradientEnd.y, 4 / this.view.zoom, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
         this.ctx.restore();
     }
 
@@ -1404,6 +1498,47 @@ class LiveryEditor {
         // Blend Mode
         const mode = layer.blendMode || 'normal';
         ctx.globalCompositeOperation = (mode === 'normal') ? 'source-over' : mode;
+
+        if (layer.type === 'gradient') {
+            const w = layer.width;
+            const h = layer.height;
+            const type = layer.gradientType || 'linear';
+            let grad;
+
+            if (type === 'radial') {
+                const r = Math.max(w, h) / 2;
+                grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+            } else {
+                // Linear: Calculate points based on angle from center
+                const angle = (layer.gradientAngle !== undefined) ? layer.gradientAngle : 90;
+                const rad = angle * Math.PI / 180;
+                const r = Math.sqrt(w * w + h * h) / 2; // Half diagonal
+
+                // Direction vector
+                const x2 = Math.cos(rad) * r;
+                const y2 = Math.sin(rad) * r;
+                // Start is opposite
+                grad = ctx.createLinearGradient(-x2, -y2, x2, y2);
+            }
+
+            grad.addColorStop(0, layer.colorStart || '#ffffff');
+
+            // Balance Logic: Shift the midpoint (50/50 mix) to the balance position
+            const balance = (layer.gradientBalance !== undefined) ? layer.gradientBalance : 50;
+            if (balance !== 50) {
+                const c1 = this.hexToRgb(layer.colorStart || '#ffffff');
+                const c2 = this.hexToRgb(layer.colorEnd || '#000000');
+                const r = Math.round((c1.r + c2.r) / 2);
+                const g = Math.round((c1.g + c2.g) / 2);
+                const b = Math.round((c1.b + c2.b) / 2);
+                const midHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+                grad.addColorStop(balance / 100, midHex);
+            }
+
+            grad.addColorStop(1, layer.colorEnd || '#000000');
+            ctx.fillStyle = grad;
+            ctx.fillRect(-w / 2, -h / 2, w, h);
+        }
 
         if (layer.type === 'shape') {
             ctx.fillStyle = layer.color || '#fff';
@@ -2145,6 +2280,19 @@ class LiveryEditor {
         }
     }
 
+    addLayer(layer) {
+        if (!layer) return;
+        const activeIndex = this.layers.findIndex(l => l.id === this.activeLayerId);
+        if (activeIndex !== -1) {
+            this.layers.splice(activeIndex + 1, 0, layer);
+        } else {
+            this.layers.push(layer);
+        }
+        this.setActiveLayer(layer.id);
+        this.render();
+        this.saveState();
+    }
+
     saveState() {
         // Remove any states after current index (when making new changes after undo)
         this.history = this.history.slice(0, this.historyIndex + 1);
@@ -2384,6 +2532,20 @@ class LiveryEditor {
                 document.getElementById('prop-text-curve-num').value = layer.curve || 0;
             } else {
                 textSettings.style.display = 'none';
+            }
+
+            const gradSettings = document.getElementById('gradient-settings');
+            if (gradSettings) {
+                if (layer.type === 'gradient') {
+                    gradSettings.style.display = 'block';
+                    document.getElementById('prop-grad-type').value = layer.gradientType || 'linear';
+                    document.getElementById('prop-grad-angle').value = (layer.gradientAngle !== undefined) ? layer.gradientAngle : 90;
+                    document.getElementById('prop-grad-balance').value = (layer.gradientBalance !== undefined) ? layer.gradientBalance : 50;
+                    document.getElementById('prop-grad-start').value = layer.colorStart || '#ffffff';
+                    document.getElementById('prop-grad-end').value = layer.colorEnd || '#000000';
+                } else {
+                    gradSettings.style.display = 'none';
+                }
             }
 
             const lockBtn = document.getElementById('toggle-lock-btn');

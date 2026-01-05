@@ -6,6 +6,8 @@ A browser-based livery creator specifically designed for **BeamNG.drive**. Creat
 
 *   **Vector Precision**: Create custom shapes and paths with professional-grade pen tools.
 *   **Dynamic Text**: Add text with live font switching and adjustable curvature (bending).
+*   **Gradient Tool**: Create linear or radial gradients with adjustable angles, colors, and balance.
+*   **Blend Modes**: 16 professional layer blend modes (Multiply, Overlay, etc.) for advanced visual effects.
 *   **Tattoo Layers**: Convert vectors and text into "Tattoo" layers—perfectly cropped raster objects that can be rotated, scaled, and recolored easily.
 *   **Pixel Painting**: Direct brush and eraser tools for fine detailing on paint layers.
 *   **Smart Layer Management**: Visibility toggling, renaming, reordering, and locking/unlocking for a clean workflow.

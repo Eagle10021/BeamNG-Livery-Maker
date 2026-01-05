@@ -317,6 +317,34 @@
                             </div>
                         </div>
                     </div>
+
+                    <div id="gradient-settings"
+                        style="display:none; border-top: 1px solid #333; margin-top:10px; padding-top:10px;">
+                        <div class="panel-title" style="margin-left:0; font-size:10px;">Gradient Settings</div>
+                        <div class="control-row">
+                            <label>Type</label>
+                            <select id="prop-grad-type">
+                                <option value="linear">Linear</option>
+                                <option value="radial">Radial (Circle)</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <label>Angle</label>
+                            <input type="range" id="prop-grad-angle" min="0" max="360" value="90">
+                        </div>
+                        <div class="control-row">
+                            <label>Balance</label>
+                            <input type="range" id="prop-grad-balance" min="0" max="100" value="50">
+                        </div>
+                        <div class="control-row">
+                            <label>Start Color</label>
+                            <input type="color" id="prop-grad-start" style="width:100%">
+                        </div>
+                        <div class="control-row">
+                            <label>End</label>
+                            <input type="color" id="prop-grad-end" style="width:100%">
+                        </div>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -522,6 +550,21 @@
                     <path d="m4 4 7.07 17 2.51-7.39 7.39-2.51L4 4z" />
                     <path d="M22 22H2" />
                     <path d="M12 12l10-10" />
+                </svg>
+            </button>
+            <button class="tool-btn" id="tool-gradient" title="Gradient Tool (G)">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d946ef" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M2 12h20"></path>
+                    <defs>
+                        <linearGradient id="icon-grad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="currentColor" stop-opacity="0.2" />
+                            <stop offset="100%" stop-color="currentColor" stop-opacity="1" />
+                        </linearGradient>
+                    </defs>
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#icon-grad)" stroke="none"></rect>
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                 </svg>
             </button>
             <button class="tool-btn" id="tool-eyedropper" title="Eyedropper (I)">

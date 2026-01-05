@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 ## [0.3.5] - 2026-01-05
 
 ### Added
+- **Gradient Tool:** Implemented a robust Gradient Tool that allows creating resized Linear and Radial gradient boxes.
+- **Gradient Settings:** Added controls for Gradient Type (Linear/Radial), Angle (0-360°), Balance (Midpoint shift), and Start/End colors.
 - **Blend Modes:** Added support for 16 layer blend modes (Multiply, Screen, Overlay, etc.) with a new dropdown control in the Layer Properties panel.
 - **Hybrid Rendering:** Implemented specific rendering logic that smoothes images when zoomed out (preserving wireframe details) but switches to sharp pixels when zoomed in (for precise editing).
 
