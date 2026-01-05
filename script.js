@@ -603,6 +603,7 @@ class LiveryEditor {
         updateProp('prop-grad-type', 'gradientType');
         updateProp('prop-grad-angle', 'gradientAngle', parseInt);
         updateProp('prop-grad-balance', 'gradientBalance', parseInt);
+        updateProp('prop-grad-curve', 'gradientCurve', parseInt);
 
         const blendSelect = document.getElementById('prop-blend-mode');
         if (blendSelect) {
@@ -1081,6 +1082,7 @@ class LiveryEditor {
             const layer = this.layers.find(l => l.id === this.activeLayerId);
             if (layer && !layer.isBase && !layer.locked) {
                 const local = this.toLocal(virtualPt, layer);
+                this.dragStart = virtualPt; // Store for resizing/rotating
                 if (this.checkGizmoHit(local, layer)) return;
             }
         }
@@ -1115,7 +1117,16 @@ class LiveryEditor {
 
         const check = (x, y, anchor) => {
             if (Math.abs(local.x - x) < handleSize && Math.abs(local.y - y) < handleSize) {
-                this.isResizing = true; this.resizeAnchor = anchor; return true;
+                this.isResizing = true;
+                this.resizeAnchor = anchor;
+                this.resizeStartState = {
+                    x: layer.x, y: layer.y,
+                    w: layer.width, h: layer.height,
+                    sx: layer.scaleX || layer.scale || 1,
+                    sy: layer.scaleY || layer.scale || 1,
+                    rot: layer.rotation
+                };
+                return true;
             }
             return false;
         };
@@ -1266,42 +1277,92 @@ class LiveryEditor {
 
         if (this.isResizing && this.activeLayerId) {
             const layer = this.layers.find(l => l.id === this.activeLayerId);
-            if (layer) {
-                // Calculate new dimensions based on mouse position
-                const local = this.toLocal(virtualPt, layer);
+            if (layer && this.resizeStartState && this.dragStart) {
+                const s = this.resizeStartState;
+                const mStart = this.dragStart;
+                const mCurr = virtualPt;
 
-                // Determine new scale X and Y based on distance from center
-                // This assumes dragging from corners (which gizmos are)
-                // New Half Width = abs(local.x)
-                // New Scale X = New Half Width / Original Half Width
+                // Delta from drag start
+                const dx = mCurr.x - mStart.x;
+                const dy = mCurr.y - mStart.y;
 
-                let newScaleX = Math.abs(local.x) / (layer.width / 2);
-                let newScaleY = Math.abs(local.y) / (layer.height / 2);
+                // Rotate delta to Local Space (aligned to 0 rotation)
+                const cos = Math.cos(-s.rot);
+                const sin = Math.sin(-s.rot);
+                const ldx = dx * cos - dy * sin;
+                const ldy = dx * sin + dy * cos;
 
-                newScaleX = Math.max(0.01, newScaleX);
-                newScaleY = Math.max(0.01, newScaleY);
+                let newW_scaled = s.w * s.sx;
+                let newH_scaled = s.h * s.sy;
+                const minSize = 1;
 
-                if (e.shiftKey) {
-                    // Uniform scaling (maintain aspect ratio)
-                    // Use the larger scale factor to grow, or follow logic
-                    const maxScale = Math.max(newScaleX, newScaleY);
-                    layer.scaleX = maxScale;
-                    layer.scaleY = maxScale;
-                    layer.scale = maxScale;
-                } else {
-                    // Free scaling
-                    layer.scaleX = newScaleX;
-                    layer.scaleY = newScaleY;
-                    layer.scale = (newScaleX + newScaleY) / 2; // Average for UI
+                // Determine transform based on anchor
+                // We calculate Width/Height changes and Center point shift (in Local space)
+                let cx_shift = 0;
+                let cy_shift = 0;
+
+                if (this.resizeAnchor === 'BR') {
+                    newW_scaled += ldx;
+                    newH_scaled += ldy;
+                } else if (this.resizeAnchor === 'TL') {
+                    newW_scaled -= ldx;
+                    newH_scaled -= ldy;
+                } else if (this.resizeAnchor === 'TR') {
+                    newW_scaled += ldx;
+                    newH_scaled -= ldy;
+                } else if (this.resizeAnchor === 'BL') {
+                    newW_scaled -= ldx;
+                    newH_scaled += ldy;
                 }
 
-                // Sync mirror scale
+                // Min Size Constraint
+                if (newW_scaled < minSize) newW_scaled = minSize;
+                if (newH_scaled < minSize) newH_scaled = minSize;
+
+                // Aspect Ratio Constraint (Shift)
+                if (e.shiftKey) {
+                    const ratio = (s.w * s.sx) / (s.h * s.sy);
+                    // Force H based on W
+                    newH_scaled = newW_scaled / ratio;
+                }
+
+                // Calculate shifts required to keep the opposite corner fixed
+                // The Center shifts by half of the delta applied to the dimensions
+                // But direction depends on anchor
+                const dW = newW_scaled - (s.w * s.sx);
+                const dH = newH_scaled - (s.h * s.sy);
+
+                if (this.resizeAnchor === 'BR') {
+                    cx_shift = dW / 2; cy_shift = dH / 2;
+                } else if (this.resizeAnchor === 'TL') {
+                    cx_shift = -dW / 2; cy_shift = -dH / 2;
+                } else if (this.resizeAnchor === 'TR') {
+                    cx_shift = dW / 2; cy_shift = -dH / 2;
+                } else if (this.resizeAnchor === 'BL') {
+                    cx_shift = -dW / 2; cy_shift = dH / 2;
+                }
+
+                // Apply Scales
+                layer.scaleX = newW_scaled / s.w;
+                layer.scaleY = newH_scaled / s.h;
+                layer.scale = (layer.scaleX + layer.scaleY) / 2;
+
+                // Apply World Position Shift
+                // Rotate the local center shift back to world space
+                const w_cos = Math.cos(s.rot);
+                const w_sin = Math.sin(s.rot);
+                layer.x = s.x + (cx_shift * w_cos - cy_shift * w_sin);
+                layer.y = s.y + (cx_shift * w_sin + cy_shift * w_cos);
+
+                // Sync mirror
                 if (layer.mirrorLayerId) {
                     const mirror = this.layers.find(l => l.id === layer.mirrorLayerId);
                     if (mirror) {
-                        mirror.scale = layer.scale;
                         mirror.scaleX = layer.scaleX;
                         mirror.scaleY = layer.scaleY;
+                        mirror.scale = layer.scale;
+                        // Mirror position update would require complex logic, usually handled by updateMirrorPosition
+                        // For now we sync scale.
                     }
                 }
 
@@ -1310,6 +1371,7 @@ class LiveryEditor {
             }
             return;
         }
+
 
         if (this.isDragging && this.activeLayerId) {
             const dx = virtualPt.x - this.dragStart.x;
@@ -1503,41 +1565,113 @@ class LiveryEditor {
             const w = layer.width;
             const h = layer.height;
             const type = layer.gradientType || 'linear';
-            let grad;
+            const curve = layer.gradientCurve || 0;
 
-            if (type === 'radial') {
-                const r = Math.max(w, h) / 2;
-                grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+            if (type === 'linear' && Math.abs(curve) > 5) {
+                // BENT GRADIENT (Using Conic Gradient on Arc)
+                // Curve > 0: Smiles (Concave Up). Curve < 0: Frowns.
+                // We define R relative to width. Small curve = Large R.
+                // R = w / (curve/scaling)
+                const R = w / (Math.abs(curve) * 0.02);
+
+                // Center of curvature
+                // If Smile, center is below (positive Y relative to box).
+                // If Frown, center is above (negative Y).
+                const cx_curv = 0;
+                const cy_curv = (curve > 0) ? R : -R;
+
+                // Arc Angles
+                // Sweep angle = ArcLength / Radius. ArcLength approx Width.
+                const sweep = w / R;
+
+                // Base Angle: direction from CurvatureCenter to BoxCenter.
+                // If Smile (Center Below), box is North (-PI/2).
+                // If Frown (Center Above), box is South (+PI/2).
+                const baseAngle = (curve > 0) ? -Math.PI / 2 : Math.PI / 2;
+
+                const startAngle = baseAngle - sweep / 2;
+                const endAngle = baseAngle + sweep / 2;
+
+                const rInner = R - h / 2;
+                const rOuter = R + h / 2;
+
+                ctx.save();
+                ctx.beginPath();
+                // Outer Arc
+                ctx.arc(cx_curv, cy_curv, rOuter, startAngle, endAngle);
+                // Inner Arc (reverse direction to close path cleanly)
+                ctx.arc(cx_curv, cy_curv, rInner, endAngle, startAngle, true);
+                ctx.closePath();
+                ctx.clip();
+
+                // Conic Gradient
+                // We want the gradient to sweep from StartColor (at startAngle) to EndColor (at endAngle).
+                // createConicGradient(startAngle, x, y): The gradient starts at 'startAngle' (0.0 stop).
+                // So we orient it to startAngle.
+                const grad = ctx.createConicGradient(startAngle, cx_curv, cy_curv);
+
+                // The sweep covers only a fraction of the full 2PI circle.
+                // We must place the color stops at 0 and (sweep / 2PI).
+                const fraction = sweep / (2 * Math.PI);
+
+                grad.addColorStop(0, layer.colorStart || '#ffffff');
+
+                // Balance Logic
+                const balance = (layer.gradientBalance !== undefined) ? layer.gradientBalance : 50;
+                if (balance !== 50) {
+                    const c1 = this.hexToRgb(layer.colorStart || '#ffffff');
+                    const c2 = this.hexToRgb(layer.colorEnd || '#000000');
+                    const r = Math.round((c1.r + c2.r) / 2);
+                    const g = Math.round((c1.g + c2.g) / 2);
+                    const b = Math.round((c1.b + c2.b) / 2);
+                    const midHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+                    grad.addColorStop(fraction * (balance / 100), midHex);
+                }
+
+                grad.addColorStop(fraction, layer.colorEnd || '#000000');
+
+                ctx.fillStyle = grad;
+                // Fill the bounding box of the arc
+                const maxR = rOuter + 50;
+                ctx.fillRect(cx_curv - maxR, cy_curv - maxR, maxR * 2, maxR * 2);
+                ctx.restore();
+
             } else {
-                // Linear: Calculate points based on angle from center
-                const angle = (layer.gradientAngle !== undefined) ? layer.gradientAngle : 90;
-                const rad = angle * Math.PI / 180;
-                const r = Math.sqrt(w * w + h * h) / 2; // Half diagonal
+                let grad;
+                if (type === 'radial') {
+                    const r = Math.max(w, h) / 2;
+                    grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+                } else {
+                    // Linear: Calculate points based on angle from center
+                    const angle = (layer.gradientAngle !== undefined) ? layer.gradientAngle : 90;
+                    const rad = angle * Math.PI / 180;
+                    const r = Math.sqrt(w * w + h * h) / 2; // Half diagonal
 
-                // Direction vector
-                const x2 = Math.cos(rad) * r;
-                const y2 = Math.sin(rad) * r;
-                // Start is opposite
-                grad = ctx.createLinearGradient(-x2, -y2, x2, y2);
+                    // Direction vector
+                    const x2 = Math.cos(rad) * r;
+                    const y2 = Math.sin(rad) * r;
+                    // Start is opposite
+                    grad = ctx.createLinearGradient(-x2, -y2, x2, y2);
+                }
+
+                grad.addColorStop(0, layer.colorStart || '#ffffff');
+
+                // Balance Logic
+                const balance = (layer.gradientBalance !== undefined) ? layer.gradientBalance : 50;
+                if (balance !== 50) {
+                    const c1 = this.hexToRgb(layer.colorStart || '#ffffff');
+                    const c2 = this.hexToRgb(layer.colorEnd || '#000000');
+                    const r = Math.round((c1.r + c2.r) / 2);
+                    const g = Math.round((c1.g + c2.g) / 2);
+                    const b = Math.round((c1.b + c2.b) / 2);
+                    const midHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+                    grad.addColorStop(balance / 100, midHex);
+                }
+
+                grad.addColorStop(1, layer.colorEnd || '#000000');
+                ctx.fillStyle = grad;
+                ctx.fillRect(-w / 2, -h / 2, w, h);
             }
-
-            grad.addColorStop(0, layer.colorStart || '#ffffff');
-
-            // Balance Logic: Shift the midpoint (50/50 mix) to the balance position
-            const balance = (layer.gradientBalance !== undefined) ? layer.gradientBalance : 50;
-            if (balance !== 50) {
-                const c1 = this.hexToRgb(layer.colorStart || '#ffffff');
-                const c2 = this.hexToRgb(layer.colorEnd || '#000000');
-                const r = Math.round((c1.r + c2.r) / 2);
-                const g = Math.round((c1.g + c2.g) / 2);
-                const b = Math.round((c1.b + c2.b) / 2);
-                const midHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-                grad.addColorStop(balance / 100, midHex);
-            }
-
-            grad.addColorStop(1, layer.colorEnd || '#000000');
-            ctx.fillStyle = grad;
-            ctx.fillRect(-w / 2, -h / 2, w, h);
         }
 
         if (layer.type === 'shape') {
@@ -2541,6 +2675,7 @@ class LiveryEditor {
                     document.getElementById('prop-grad-type').value = layer.gradientType || 'linear';
                     document.getElementById('prop-grad-angle').value = (layer.gradientAngle !== undefined) ? layer.gradientAngle : 90;
                     document.getElementById('prop-grad-balance').value = (layer.gradientBalance !== undefined) ? layer.gradientBalance : 50;
+                    document.getElementById('prop-grad-curve').value = (layer.gradientCurve !== undefined) ? layer.gradientCurve : 0;
                     document.getElementById('prop-grad-start').value = layer.colorStart || '#ffffff';
                     document.getElementById('prop-grad-end').value = layer.colorEnd || '#000000';
                 } else {

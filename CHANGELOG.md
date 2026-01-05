@@ -8,11 +8,12 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **Gradient Tool:** Implemented a robust Gradient Tool that allows creating resized Linear and Radial gradient boxes.
-- **Gradient Settings:** Added controls for Gradient Type (Linear/Radial), Angle (0-360°), Balance (Midpoint shift), and Start/End colors.
+- **Gradient Settings:** Added controls for Gradient Type (Linear/Radial), Angle (0-360°), Balance (Color weighting), and **Curve (Bending)**.
 - **Blend Modes:** Added support for 16 layer blend modes (Multiply, Screen, Overlay, etc.) with a new dropdown control in the Layer Properties panel.
 - **Hybrid Rendering:** Implemented specific rendering logic that smoothes images when zoomed out (preserving wireframe details) but switches to sharp pixels when zoomed in (for precise editing).
 
 ### Fixed
+- **Layer Resizing:** Completely rewrote Gizmo resizing logic. Resizing now respects the anchor point (opposite corner stays fixed) instead of scaling from the center.
 - **Rendering Issues:** Addressed blurriness on High DPI displays by enforcing stricter image smoothing controls during zoom operations.
 
 ## [0.3.0] - 2026-01-05
