@@ -1,13 +1,13 @@
 :root {
-    --bg-color: #121214;
-    --surface-color: #1e1e21;
-    --surface-hover: #29292e;
+    --bg-color: #0c0c0e;
+    --surface-color: #18181b;
+    --surface-hover: #27272a;
     --primary-color: #5e6670;
     --accent-color: #f97316;
     --accent-glow: rgba(249, 115, 22, 0.4);
     --text-primary: #f4f4f7;
     --text-secondary: #a1a1aa;
-    --border-color: #27272a;
+    --border-color: #3f3f46;
     --radius: 8px;
     --header-height: 52px;
     --panel-width: 290px;
@@ -54,9 +54,57 @@ header {
     opacity: 0.9;
 }
 
-.header-actions {
+/* Header Layout */
+.header-left {
     display: flex;
+    align-items: center;
     gap: 8px;
+}
+
+.header-center {
+    display: flex;
+    justify-content: center;
+    padding: 0 16px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-separator {
+    width: 1px;
+    height: 24px;
+    background: #333;
+    margin: 0 4px;
+}
+
+/* Header Tools (Undo/Redo Group) */
+/* Header Tools (Undo/Redo Group) */
+.header-tools {
+    display: flex;
+    gap: 4px;
+    background: var(--surface-color);
+    padding: 4px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.export-settings-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.03), transparent);
+    margin-left: 12px;
+}
+
+.export-settings-group input {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
 }
 
 button {

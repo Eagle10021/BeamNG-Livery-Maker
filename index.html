@@ -16,34 +16,49 @@
 
 <body>
     <header>
-        <div class="logo">
-            <!-- BeamNG Logo (Approx) -->
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#f97316" />
-                <path d="M2 17L12 22L22 17" stroke="#f97316" stroke-width="2" stroke-linejoin="round" />
-                <path d="M2 12L12 17L22 12" stroke="#f97316" stroke-width="2" stroke-linejoin="round" />
-            </svg>
-            <span style="color: #f97316; font-weight: 700;">BeamNG</span> <span
-                style="font-weight: 400; opacity: 0.8;">Livery Studio</span>
-        </div>
+        <div class="header-left">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="beam-logo"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#f97316" />
+                    <path d="M2 17L12 22L22 17" stroke="#f97316" stroke-width="2" stroke-linejoin="round" />
+                    <path d="M2 12L12 17L22 12" stroke="#f97316" stroke-width="2" stroke-linejoin="round" />
+                </svg>
+                <span class="logo-text"><span style="color: #f97316; font-weight: 700;">BeamNG</span> <span
+                        style="font-weight: 400; opacity: 0.8;">Livery Studio</span></span>
+            </div>
 
-        <div class="header-tools">
-            <!-- Center Toolbar? -->
-        </div>
+            <div class="header-separator"></div>
 
-        <div class="header-actions">
-            <!-- Export Controls -->
-            <div
-                style="display: flex; align-items: center; gap: 8px; background: #222; padding: 4px 8px; border-radius: 6px; border: 1px solid #333; margin-right: 8px;">
+            <button id="import-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Import
+                <input type="file" id="file-import" accept="image/*,.dds" hidden>
+            </button>
+            <button class="primary" id="export-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export .DDS
+            </button>
+
+            <!-- Export Settings Group -->
+            <div class="export-settings-group">
                 <div style="display: flex; flex-direction: column; align-items: flex-start; margin-right: 4px;">
                     <label
-                        style="font-size: 9px; color: #888; text-transform: uppercase; font-weight: 700; margin-bottom: 0;">Export
+                        style="font-size: 9px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 0;">Export
                         Format</label>
                     <div
-                        style="font-size: 11px; color: #ccc; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                        style="font-size: 11px; color: var(--text-primary); font-weight: 500; display: flex; align-items: center; gap: 4px;">
                         RGBA Uncompressed
                         <div class="tooltip-container">
-                            <span style="color: #666; cursor: help;">ⓘ</span>
+                            <span style="color: var(--primary-color); cursor: help;">ⓘ</span>
                             <div class="tooltip">
                                 Current: Lossless Quality (Large File).<br>
                                 For BC7/BC1 Compression (Small File), please use external tools like Paint.net or
@@ -53,12 +68,33 @@
                     </div>
                 </div>
 
-                <div style="width: 1px; height: 24px; background: #444; margin: 0 4px;"></div>
+                <div style="width: 1px; height: 24px; background: var(--border-color); margin: 0 8px;"></div>
 
                 <input type="text" id="export-name" placeholder="VEHICLE.skin.SKINNAME" value="VEHICLE.skin.SKINNAME"
-                    style="width: 140px; background: transparent; border: none; color: #fff; height: 20px; font-size: 12px; font-family: 'Inter', sans-serif;">
-                <span style="color: #666; font-size: 11px;">.dds</span>
+                    style="width: 240px; background: transparent; border: none; color: var(--text-primary); height: 20px; font-size: 13px;">
+                <span style="color: var(--text-secondary); font-size: 11px;">.dds</span>
             </div>
+        </div>
+
+        <div class="header-center">
+            <div class="header-tools">
+                <button class="icon-btn" id="undo-btn" title="Undo (Ctrl+Z)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 14L4 9l5-5" />
+                        <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
+                    </svg>
+                </button>
+                <button class="icon-btn" id="redo-btn" title="Redo (Ctrl+Y)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 14l5-5-5-5" />
+                        <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="header-right">
+
 
             <a href="guide.html" target="_blank" style="text-decoration: none;">
                 <button class="guide-btn">
@@ -103,24 +139,6 @@
                     </div>
                 </div>
             </div>
-
-            <button id="import-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Import
-                <input type="file" id="file-import" accept="image/*,.dds" hidden>
-            </button>
-            <button class="primary" id="export-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Export .DDS
-            </button>
         </div>
     </header>
 

@@ -4,6 +4,7 @@ class LiveryEditor {
         this.ctx = this.canvas.getContext('2d');
         this.layers = [];
         this.activeLayerId = null;
+        this.clipboard = null; // Layer clipboard
         this.selectedLayers = []; // For multi-select
         this.history = []; // Undo history
         this.historyIndex = -1;
@@ -109,7 +110,7 @@ class LiveryEditor {
             color: this.brushColor, // Use universal color
             x: this.virtualWidth / 2, y: this.virtualHeight / 2,
             width: 200, height: 200,
-            rotation: 0, opacity: 1, scale: 1,
+            rotation: 0, opacity: 1, scale: 1, scaleX: 1, scaleY: 1,
             flipX: false, flipY: false,
             hue: 0, saturation: 100, brightness: 100,
             isBase: false, locked: false
@@ -132,7 +133,7 @@ class LiveryEditor {
             width: 2,
             closed: false,
             x: 0, y: 0,
-            scale: 1, rotation: 0, opacity: 1,
+            scale: 1, scaleX: 1, scaleY: 1, rotation: 0, opacity: 1,
             isBase: false, locked: false
         };
         this.layers.push(layer);
@@ -389,6 +390,8 @@ class LiveryEditor {
             rotation: 0,
             opacity: 1,
             scale: 1,
+            scaleX: 1,
+            scaleY: 1,
             flipX: false,
             flipY: false,
             hue: 0,
@@ -649,6 +652,17 @@ class LiveryEditor {
         if (resetBtn) resetBtn.addEventListener('click', () => this.resetView());
 
         new ResizeObserver(() => this.updateCanvasDisplaySize()).observe(document.querySelector('.workspace'));
+
+        // Drag & Drop
+        const workspace = document.querySelector('.workspace');
+        workspace.addEventListener('dragover', (e) => { e.preventDefault(); });
+        workspace.addEventListener('drop', (e) => this.handleDrop(e));
+
+        // Global Paste (for external images)
+        window.addEventListener('paste', (e) => this.handlePaste(e));
+
+        document.getElementById('undo-btn').addEventListener('click', () => this.undo());
+        document.getElementById('redo-btn').addEventListener('click', () => this.redo());
     }
 
     handleKeyDown(e) {
@@ -676,28 +690,25 @@ class LiveryEditor {
 
         if (e.ctrlKey && e.key === 'z') {
             e.preventDefault();
-            this.undo();
+            document.getElementById('undo-btn').click();
         }
 
         if (e.ctrlKey && e.key === 'y') {
             e.preventDefault();
-            this.redo();
+            document.getElementById('redo-btn').click();
         }
 
-        // Tools
-        if (e.key === 'v') this.setTool('move');
-        if (e.key === 'h' || e.key === ' ') {
-            e.preventDefault(); // Prevent page scroll
-            this.setTool('hand');
+        if (e.ctrlKey && e.key === 'c') {
+            e.preventDefault();
+            this.copyActiveLayer();
         }
-        if (e.key === 'b') this.setTool('brush');
-        if (e.key === 'e') this.setTool('eraser');
-        if (e.key === 'f') this.setTool('fill');
-        if (e.key === 'i') this.setTool('eyedropper');
-        if (e.key === 't') this.setTool('text');
-        if (e.key === 'l') this.setTool('line');
-        if (e.key === 'm') this.addShapeLayer('rect');
-        if (e.key === 'c') this.addShapeLayer('circle');
+
+        if (e.ctrlKey && e.key === 'v') {
+            e.preventDefault();
+            this.pasteLayer();
+        }
+
+
     }
 
     handleWheel(e) {
@@ -770,8 +781,14 @@ class LiveryEditor {
             if (layer.hidden || layer.isBase || (layer.locked && this.currentTool !== 'hand')) continue;
 
             const local = this.toLocal(virtualPt, layer);
-            const w = layer.width * layer.scale;
-            const h = layer.height * layer.scale;
+            const w = layer.width * (layer.scaleX || layer.scale || 1);
+            const h = layer.height * (layer.scaleY || layer.scale || 1);
+
+            // Adjust local point to be relative to center considering scale, but hit testing usually happens in local unscaled space? 
+            // Actually, if we use local coords, we should check against unscaled width/height?
+            // toLocal removes rotation and translation. It does NOT remove scale.
+            // So if toLocal does not remove scale, we need to compare against Scaled Width/Height.
+            // Correct.
 
             if (Math.abs(local.x) <= w / 2 && Math.abs(local.y) <= h / 2) {
                 // If it's a paint or image layer, check for transparency at that pixel
@@ -787,8 +804,11 @@ class LiveryEditor {
     }
 
     isPixelTransparent(layer, imX, imY) {
-        const x = Math.floor(imX + layer.width / 2);
-        const y = Math.floor(imY + layer.height / 2);
+        // Correct for non-uniform scale
+        const sx = layer.scaleX || layer.scale || 1;
+        const sy = layer.scaleY || layer.scale || 1;
+        const x = Math.floor(imX / sx + layer.width / 2);
+        const y = Math.floor(imY / sy + layer.height / 2);
 
         if (x < 0 || x >= layer.width || y < 0 || y >= layer.height) return true;
 
@@ -1006,8 +1026,10 @@ class LiveryEditor {
     }
 
     checkGizmoHit(local, layer) {
-        const w = layer.width * layer.scale;
-        const h = layer.height * layer.scale;
+        const sx = layer.scaleX || layer.scale || 1;
+        const sy = layer.scaleY || layer.scale || 1;
+        const w = layer.width * sx;
+        const h = layer.height * sy;
         const hw = w / 2, hh = h / 2;
         const handleSize = 20 / this.view.zoom;
 
@@ -1151,15 +1173,41 @@ class LiveryEditor {
         if (this.isResizing && this.activeLayerId) {
             const layer = this.layers.find(l => l.id === this.activeLayerId);
             if (layer) {
-                const dist = Math.hypot(virtualPt.x - layer.x, virtualPt.y - layer.y);
-                const baseDist = Math.hypot(layer.width, layer.height) / 2;
-                layer.scale = Math.max(0.01, dist / baseDist);
+                // Calculate new dimensions based on mouse position
+                const local = this.toLocal(virtualPt, layer);
+
+                // Determine new scale X and Y based on distance from center
+                // This assumes dragging from corners (which gizmos are)
+                // New Half Width = abs(local.x)
+                // New Scale X = New Half Width / Original Half Width
+
+                let newScaleX = Math.abs(local.x) / (layer.width / 2);
+                let newScaleY = Math.abs(local.y) / (layer.height / 2);
+
+                newScaleX = Math.max(0.01, newScaleX);
+                newScaleY = Math.max(0.01, newScaleY);
+
+                if (e.shiftKey) {
+                    // Uniform scaling (maintain aspect ratio)
+                    // Use the larger scale factor to grow, or follow logic
+                    const maxScale = Math.max(newScaleX, newScaleY);
+                    layer.scaleX = maxScale;
+                    layer.scaleY = maxScale;
+                    layer.scale = maxScale;
+                } else {
+                    // Free scaling
+                    layer.scaleX = newScaleX;
+                    layer.scaleY = newScaleY;
+                    layer.scale = (newScaleX + newScaleY) / 2; // Average for UI
+                }
 
                 // Sync mirror scale
                 if (layer.mirrorLayerId) {
                     const mirror = this.layers.find(l => l.id === layer.mirrorLayerId);
                     if (mirror) {
                         mirror.scale = layer.scale;
+                        mirror.scaleX = layer.scaleX;
+                        mirror.scaleY = layer.scaleY;
                     }
                 }
 
@@ -1270,8 +1318,8 @@ class LiveryEditor {
         ctx.translate(layer.x, layer.y);
         ctx.rotate(layer.rotation);
 
-        const sx = (layer.flipX ? -1 : 1) * layer.scale;
-        const sy = (layer.flipY ? -1 : 1) * layer.scale;
+        const sx = (layer.flipX ? -1 : 1) * (layer.scaleX || layer.scale || 1);
+        const sy = (layer.flipY ? -1 : 1) * (layer.scaleY || layer.scale || 1);
         ctx.scale(sx, sy);
 
         const hue = layer.hue || 0;
@@ -1647,8 +1695,8 @@ class LiveryEditor {
         ctx.translate(layer.x, layer.y);
         ctx.rotate(layer.rotation);
 
-        const w = layer.width * layer.scale;
-        const h = layer.height * layer.scale;
+        const w = layer.width * (layer.scaleX || layer.scale || 1);
+        const h = layer.height * (layer.scaleY || layer.scale || 1);
         const hw = w / 2, hh = h / 2;
 
         const handleSize = 10 / this.view.zoom;
@@ -1825,7 +1873,7 @@ class LiveryEditor {
             this.layers.unshift({
                 id: 'base', name: name, type: 'image', img: img,
                 x: img.width / 2, y: img.height / 2, width: img.width, height: img.height,
-                rotation: 0, opacity: 1, scale: 1,
+                rotation: 0, opacity: 1, scale: 1, scaleX: 1, scaleY: 1,
                 flipX: false, flipY: false,
                 hue: 0, saturation: 100, brightness: 100,
                 isBase: true, locked: true
@@ -1836,62 +1884,163 @@ class LiveryEditor {
     }
 
     addLayerFromUpload(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+        if (!e.target.files || e.target.files.length === 0) return;
+        this.addLayersFromFiles(e.target.files);
+        e.target.value = ''; // Allow re-importing same file
+    }
 
-        const isDDS = file.name.toLowerCase().endsWith('.dds');
-        const reader = new FileReader();
+    addLayersFromFiles(fileList) {
+        Array.from(fileList).forEach(file => {
+            const isDDS = file.name.toLowerCase().endsWith('.dds');
+            const reader = new FileReader();
 
-        reader.onload = (event) => {
-            if (isDDS) {
-                try {
-                    const buffer = event.target.result;
-                    const decoded = DDSDecoder.decode(buffer);
+            reader.onload = (event) => {
+                if (isDDS) {
+                    try {
+                        const buffer = event.target.result;
+                        const decoded = DDSDecoder.decode(buffer);
 
-                    // Create a canvas to hold the decoded data
-                    const canvas = document.createElement('canvas');
-                    canvas.width = decoded.width;
-                    canvas.height = decoded.height;
-                    const ctx = canvas.getContext('2d');
+                        const canvas = document.createElement('canvas');
+                        canvas.width = decoded.width;
+                        canvas.height = decoded.height;
+                        const ctx = canvas.getContext('2d');
 
-                    const imageData = new ImageData(decoded.data, decoded.width, decoded.height);
-                    ctx.putImageData(imageData, 0, 0);
+                        const imageData = new ImageData(decoded.data, decoded.width, decoded.height);
+                        ctx.putImageData(imageData, 0, 0);
 
-                    // Convert canvas to image for the layer
+                        const img = new Image();
+                        img.onload = () => {
+                            this.setBaseLayer(img, file.name); // Usually DDS is base, but we might want to support DDS layers too? Assumed base for now if DDS? Code assumed base.
+                            this.render();
+                        };
+                        img.src = canvas.toDataURL();
+                    } catch (err) {
+                        alert("Error loading DDS: " + err.message);
+                    }
+                } else {
                     const img = new Image();
                     img.onload = () => {
-                        this.setBaseLayer(img, file.name);
-                        this.render();
+                        const layer = {
+                            id: Date.now() + Math.random(), // Ensure unique ID for batch imports
+                            name: file.name, type: 'image', img: img,
+                            x: this.virtualWidth / 2, y: this.virtualHeight / 2,
+                            width: img.width, height: img.height,
+                            rotation: 0, opacity: 1, scale: 1,
+                            flipX: false, flipY: false,
+                            hue: 0, saturation: 100, brightness: 100,
+                            isBase: false, locked: false
+                        };
+                        this.layers.push(layer);
+                        this.setActiveLayer(layer.id);
+                        this.setTool('move');
                     };
-                    img.src = canvas.toDataURL();
-                } catch (err) {
-                    alert("Error loading DDS: " + err.message);
+                    img.src = event.target.result;
                 }
-            } else {
-                const img = new Image();
-                img.onload = () => {
-                    const layer = {
-                        id: Date.now(), name: file.name, type: 'image', img: img,
-                        x: this.virtualWidth / 2, y: this.virtualHeight / 2,
-                        width: img.width, height: img.height,
-                        rotation: 0, opacity: 1, scale: 1,
-                        flipX: false, flipY: false,
-                        hue: 0, saturation: 100, brightness: 100,
-                        isBase: false, locked: false
-                    };
-                    this.layers.push(layer);
-                    this.setActiveLayer(layer.id);
-                    this.setTool('move');
-                };
-                img.src = event.target.result;
-            }
-        };
+            };
 
-        if (isDDS) {
-            reader.readAsArrayBuffer(file);
-        } else {
-            reader.readAsDataURL(file);
+            if (isDDS) {
+                reader.readAsArrayBuffer(file);
+            } else {
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    handleDrop(e) {
+        e.preventDefault();
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            this.addLayersFromFiles(e.dataTransfer.files);
         }
+    }
+
+    handlePaste(e) {
+        if (e.clipboardData && e.clipboardData.items) {
+            const items = e.clipboardData.items;
+            const files = [];
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const blob = items[i].getAsFile();
+                    files.push(blob);
+                }
+            }
+            if (files.length > 0) {
+                e.preventDefault();
+                this.addLayersFromFiles(files);
+            }
+        }
+    }
+
+    copyActiveLayer() {
+        if (!this.activeLayerId) return;
+        const layer = this.layers.find(l => l.id === this.activeLayerId);
+        if (!layer || layer.isBase) return;
+
+        // Create deep copy for clipboard
+        const clone = { ...layer };
+
+        // Deep copy points for path layers
+        if (layer.points) {
+            clone.points = JSON.parse(JSON.stringify(layer.points));
+        }
+
+        // Handle paint layers
+        if (layer.type === 'paint' && layer.canvas) {
+            const back = document.createElement('canvas');
+            back.width = layer.canvas.width;
+            back.height = layer.canvas.height;
+            back.getContext('2d').drawImage(layer.canvas, 0, 0);
+            clone.cachedCanvasStart = back;
+            delete clone.canvas;
+            delete clone.ctx;
+            delete clone.img; // remove preview
+        }
+
+        // Remove runtime unique props
+        delete clone.id;
+        delete clone.mirrorLayerId;
+
+        this.clipboard = clone;
+    }
+
+    pasteLayer() {
+        if (!this.clipboard) return;
+        const source = this.clipboard;
+
+        const layer = { ...source };
+        layer.id = Date.now();
+        layer.name = source.name + ' (Copy)';
+        layer.x += 20;
+        layer.y += 20;
+
+        // Restore paint content
+        if (layer.type === 'paint' && source.cachedCanvasStart) {
+            const canvas = document.createElement('canvas');
+            canvas.width = source.width;
+            canvas.height = source.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(source.cachedCanvasStart, 0, 0);
+
+            layer.canvas = canvas;
+            layer.ctx = ctx;
+
+            const img = new Image();
+            img.src = canvas.toDataURL();
+            layer.img = img;
+
+            delete layer.cachedCanvasStart;
+        }
+
+        // Insert above active or at top
+        const activeIndex = this.layers.findIndex(l => l.id === this.activeLayerId);
+        if (activeIndex !== -1) {
+            this.layers.splice(activeIndex + 1, 0, layer);
+        } else {
+            this.layers.push(layer);
+        }
+
+        this.setActiveLayer(layer.id);
+        this.render();
+        this.saveState();
     }
 
     exportImage() {
@@ -2127,7 +2276,11 @@ class LiveryEditor {
             const deg = Math.round((layer.rotation || 0) * (180 / Math.PI));
             document.getElementById('prop-rotation').value = deg;
             document.getElementById('prop-rotation-slider').value = deg;
-            document.getElementById('prop-scale').value = layer.scale;
+
+            // Show average or X scale if non-uniform
+            const s = layer.scaleX || layer.scale || 1;
+            document.getElementById('prop-scale').value = s;
+
             document.getElementById('prop-hue').value = layer.hue || 0;
             document.getElementById('prop-saturation').value = layer.saturation !== undefined ? layer.saturation : 100;
             document.getElementById('prop-brightness').value = layer.brightness !== undefined ? layer.brightness : 100;
@@ -2182,6 +2335,11 @@ class LiveryEditor {
         if (!layer) return;
         if (prop === 'html-rotation') {
             layer.rotation = value * (Math.PI / 180);
+        } else if (prop === 'scale') {
+            // Uniform scale update from UI
+            layer.scale = value;
+            layer.scaleX = value;
+            layer.scaleY = value;
         } else {
             layer[prop] = value;
         }
