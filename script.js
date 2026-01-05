@@ -594,6 +594,14 @@ class LiveryEditor {
         updateProp('prop-brightness', 'brightness', parseInt);
         updateProp('prop-color', 'color');
         updateProp('prop-path-width', 'width', parseInt);
+
+        const blendSelect = document.getElementById('prop-blend-mode');
+        if (blendSelect) {
+            blendSelect.addEventListener('change', (e) => {
+                this.updateActiveLayer('blendMode', e.target.value);
+            });
+        }
+
         document.getElementById('prop-path-closed').addEventListener('change', (e) => {
             this.updateActiveLayer('closed', e.target.checked);
         });
@@ -1346,7 +1354,11 @@ class LiveryEditor {
         this.ctx.save();
         // Apply DPR scaling usually via setTransform
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        this.ctx.imageSmoothingEnabled = false; // Always crisp
+
+        // Hybrid Smoothing: Smooth when zoomed out to preserve details (like wireframes),
+        // Sharp (Pixelated) when zoomed in or at 100% to look "crisp"
+        this.ctx.imageSmoothingEnabled = this.view.zoom < 1.0;
+        this.ctx.imageSmoothingQuality = 'high';
 
         // Then apply view transform
         this.ctx.translate(this.view.x, this.view.y);
@@ -1387,7 +1399,11 @@ class LiveryEditor {
         const sat = layer.saturation !== undefined ? layer.saturation : 100;
         const bright = layer.brightness !== undefined ? layer.brightness : 100;
         ctx.filter = `hue-rotate(${hue}deg) saturate(${sat}%) brightness(${bright}%)`;
-        ctx.globalAlpha = layer.opacity;
+        ctx.globalAlpha = (layer.opacity !== undefined) ? layer.opacity : 1;
+
+        // Blend Mode
+        const mode = layer.blendMode || 'normal';
+        ctx.globalCompositeOperation = (mode === 'normal') ? 'source-over' : mode;
 
         if (layer.type === 'shape') {
             ctx.fillStyle = layer.color || '#fff';
@@ -2333,6 +2349,9 @@ class LiveryEditor {
     updateControls() {
         const layer = this.layers.find(l => l.id === this.activeLayerId);
         if (layer) {
+            const blendSelect = document.getElementById('prop-blend-mode');
+            if (blendSelect) blendSelect.value = layer.blendMode || 'normal';
+
             document.getElementById('prop-opacity').value = (layer.opacity ?? 1) * 100;
             const deg = Math.round((layer.rotation || 0) * (180 / Math.PI));
             document.getElementById('prop-rotation').value = deg;

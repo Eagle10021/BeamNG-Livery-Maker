@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+
+## [0.3.5] - 2026-01-05
+
+### Added
+- **Blend Modes:** Added support for 16 layer blend modes (Multiply, Screen, Overlay, etc.) with a new dropdown control in the Layer Properties panel.
+- **Hybrid Rendering:** Implemented specific rendering logic that smoothes images when zoomed out (preserving wireframe details) but switches to sharp pixels when zoomed in (for precise editing).
+
+### Fixed
+- **Rendering Issues:** Addressed blurriness on High DPI displays by enforcing stricter image smoothing controls during zoom operations.
+
 ## [0.3.0] - 2026-01-05
 
 ### Added
