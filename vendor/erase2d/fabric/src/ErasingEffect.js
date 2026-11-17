@@ -1,4 +1,4 @@
-import { toConsumableArray as _toConsumableArray } from '../../_virtual/_rollupPluginBabelHelpers.js';
+import { toConsumableArray as _toConsumableArray } from '../../helpers/rollupPluginBabelHelpers.js';
 import { Group } from 'fabric';
 import { ClippingGroup } from './ClippingGroup.js';
 

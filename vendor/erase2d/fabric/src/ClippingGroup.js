@@ -1,4 +1,4 @@
-import { defineProperty as _defineProperty, inherits as _inherits, createClass as _createClass, classCallCheck as _classCallCheck, callSuper as _callSuper, objectSpread2 as _objectSpread2, assertThisInitialized as _assertThisInitialized } from '../../_virtual/_rollupPluginBabelHelpers.js';
+import { defineProperty as _defineProperty, inherits as _inherits, createClass as _createClass, classCallCheck as _classCallCheck, callSuper as _callSuper, objectSpread2 as _objectSpread2, assertThisInitialized as _assertThisInitialized } from '../../helpers/rollupPluginBabelHelpers.js';
 import { classRegistry, LayoutManager, FixedLayout, Path, Group } from 'fabric';
 
 var ClippingGroup = /*#__PURE__*/function (_Group) {

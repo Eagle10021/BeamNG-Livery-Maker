@@ -1,5 +1,5 @@
-import { inherits as _inherits, classCallCheck as _classCallCheck, callSuper as _callSuper, defineProperty as _defineProperty, assertThisInitialized as _assertThisInitialized, createClass as _createClass, get as _get, getPrototypeOf as _getPrototypeOf, asyncToGenerator as _asyncToGenerator, regeneratorRuntime as _regeneratorRuntime, toConsumableArray as _toConsumableArray, slicedToArray as _slicedToArray } from '../../_virtual/_rollupPluginBabelHelpers.js';
-import { erase } from '../../core/dist/src/erase.js';
+import { inherits as _inherits, classCallCheck as _classCallCheck, callSuper as _callSuper, defineProperty as _defineProperty, assertThisInitialized as _assertThisInitialized, createClass as _createClass, get as _get, getPrototypeOf as _getPrototypeOf, asyncToGenerator as _asyncToGenerator, regeneratorRuntime as _regeneratorRuntime, toConsumableArray as _toConsumableArray, slicedToArray as _slicedToArray } from '../../helpers/rollupPluginBabelHelpers.js';
+import { erase } from '../../core/src/erase.js';
 import * as fabric from 'fabric';
 import { Group } from 'fabric';
 import { ClippingGroup } from './ClippingGroup.js';
