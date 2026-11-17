@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 
 
+## [0.4.0] - 2026-11-17
+
+A rebuild of the editor on Fabric.js, with a new layout, BC7 support and templates straight from the game.
+
+### Added
+- **BC7 textures:** DDS files in BC7 (the format most current BeamNG skins and templates use) open directly; no more converting in Photopea first. Checked pixel for pixel against Pillow on the game's own skins.
+- **Templates from your BeamNG install:** File › Open from your BeamNG install reads a vehicle's `.zip` from `content/vehicles/` in the browser and lists the game's own UV templates and the vehicle's existing skins, so every vehicle works, including ones newer than the included templates. UV templates open at the real skin size. Chrome and Edge can remember the vehicles folder.
+- **Editing built on Fabric.js 7:** proper selection handles, multi-select, group / ungroup, align to the template, snapping to its centre and edges, arrow-key nudging, copy / cut / paste / duplicate.
+- **Pen tool** with curves, and **point editing** for any shape or path (double-click or Enter).
+- **Shapes:** 28 filled shapes (new: rounded rectangle, starburst, chevron, ring, stripe, racing slash), drawn by dragging, with outlines.
+- **Text:** inline editing, 21 fonts including racing and display faces, outline, letter spacing, alignment, and a Curve slider that bends text along an arc.
+- **Brushes:** smooth, spray and dots, with size, opacity and softness; strokes collect in a paint layer.
+- **Eraser** (selected layer or all layers), **fill bucket** with tolerance and a "template only" mode for filling panels, **eyedropper**.
+- **Gradient fills** (linear with angle and balance, or radial) on any shape or text, or dragged across the texture.
+- **Linked mirrors** that follow position, size, rotation and style changes in both directions.
+- **Picture adjustments:** hue, saturation, brightness and tint on images and rasterized layers.
+- **Layers panel:** thumbnails, show / hide, lock, rename, drag to reorder; template opacity and "template on top" (drawn over the artwork, not exported).
+- **Projects and autosave:** File › Save project writes a `.livery.json`; the studio also autosaves in the browser and restores the last session.
+- **Export dialog:** DDS or PNG, with or without the template and hidden layers.
+- Drag and drop or paste images, DDS files, projects and vehicle zips.
+
+### Changed
+- New layout: menu bar, a tool options bar, a slim toolbar with colour swatches, Properties and Layers on the right, a status bar, and a template chooser with search.
+- The modding guide is rewritten for the current game: templates from the install, the `skinName` jbeam format the game's own skins use, copying a vehicle's own material, BC7 conversion for smaller files, and troubleshooting.
+
+### Removed
+- The BC7 "unsupported format" error and the conversion instructions it pointed to.
+- The old hand-written canvas editor (`script.js`).
+
 ## [0.3.5] - 2026-01-05
 
 ### Added

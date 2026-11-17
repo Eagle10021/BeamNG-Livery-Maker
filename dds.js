@@ -1,5 +1,5 @@
-// Minimal DDS Decoder for DXT1, DXT3, DXT5
-// Supports legacy DXTn FourCC and DX10 Header (BC1, BC2, BC3)
+// Minimal DDS Decoder for DXT1, DXT3, DXT5, BC4, BC5 and BC7
+// Supports legacy DXTn FourCC and DX10 Header (BC1, BC2, BC3, BC4, BC5, BC7)
 
 const DDS_MAGIC = 0x20534444;       // "DDS "
 const DDSD_MIPMAPCOUNT = 0x20000;
@@ -21,6 +21,13 @@ const DXGI_FORMAT_BC4_UNORM = 80;
 const DXGI_FORMAT_BC5_UNORM = 83;
 const DXGI_FORMAT_BC7_UNORM = 98;
 const DXGI_FORMAT_BC7_UNORM_SRGB = 99;
+
+// BC7 partition tables (2 and 3 subsets, 64 shapes of 16 texels each): one hex digit per texel, the subset in the
+// low two bits and 8 added on the subset's anchor ("fix-up") texel, whose index is stored with one bit less.
+// From bcdec by Sergii Kudlai (https://github.com/iOrange/bcdec), MIT / Unlicense.
+const BC7_P2 = "8011001100110019800100010001000981110111011101198001001100110119800000010001001980110111011111198001001101111119800000010011011980000000000100198011011111111119800000010111111980000000000101198001011111111119800000001111111980001111111111198000000000001119800010001110111981910001000000008000000090001110819100110001000080910001000000008000100091001110800000009000110081110011001100098091000100010000800010009000110081900110011001108091011001101100800101119110100080001111911100008191000110001110809110011001110081010101010101098000111100001119810110900101101080110011910011008091110000111100810101019010101081101001011010098101101010100109819100111100111080010011910010008091001001001100809110111101110081901001100101108011110011000019811001101001100980000190011000008100119001000000809001110010000080000090011100108000010091100100811011001001001980110110110010098190001110011100809110011100011081101100110010098110001100111009811111101000000980011000111001198000111100110019809100111111000080900010111011108100010001110119";
+const BC7_P3 = "801900110221222a80090011a211222180002001a2112219822a002200110119800000009122112a801900110022002a802a00221111111980110011a2112219800000009111222a800011119111222a800011912222222a801200920012001a811201920112011a812209220122012a801901121122122a80192001a2002220800900110112112a81190011a0012200800011229122112a802a002200221119811901110222022a80090001a2212221800000910122012a80001100a2902210812a092200110000801200129122222a811012a1922101108000019012a11221802211029102002a811009102002222a8011012201a2001980002000a2112229800000029122122a822a002200120019801900120022022a8120092001a001208000119122a2000081201201a0920120812020129a0101208011220011a20019801111a222000019810901012222222a80000000a1212129802219220022112a802a001100220019822012a102201229810122a22222010980002121a1212129810901010101222a822a011102220119800219120002111a800029122112211a822209110111022a800211129112000a811009100110222a800000002192211a811009102222222a802200110091002a802211229122002a800000000000291a800a000100020009822212220222922a810922222222222a81192011a2012220";
+const BC7_TABLES = [BC7_P2, BC7_P3].map(t => Uint8Array.from(t, c => parseInt(c, 16)));
 
 class DDSDecoder {
     static parseHeader(buffer) {
@@ -56,9 +63,7 @@ class DDSDecoder {
             else if (dxgiFormat === DXGI_FORMAT_BC3_UNORM || dxgiFormat === DXGI_FORMAT_BC3_UNORM_SRGB) format = 'DXT5';
             else if (dxgiFormat === DXGI_FORMAT_BC4_UNORM) format = 'BC4';
             else if (dxgiFormat === DXGI_FORMAT_BC5_UNORM) format = 'BC5';
-            else if (dxgiFormat === DXGI_FORMAT_BC7_UNORM || dxgiFormat === DXGI_FORMAT_BC7_UNORM_SRGB) {
-                throw new Error("Unsupported Texture Format.\n\nThe file uses BC7 compression, which browsers cannot read.\n\nPlease convert this skin to DXT5 (BC3) format using Paint.NET or Photoshop and upload it manually.\n\nSee the guide for more information.");
-            }
+            else if (dxgiFormat === DXGI_FORMAT_BC7_UNORM || dxgiFormat === DXGI_FORMAT_BC7_UNORM_SRGB) format = 'BC7';
             else {
                 throw new Error(`Unsupported DXGI Format: ${dxgiFormat}`);
             }
@@ -87,6 +92,8 @@ class DDSDecoder {
             byteArray = this.decodeBC4(dataView, header.width, header.height);
         } else if (header.format === 'BC5') {
             byteArray = this.decodeBC5(dataView, header.width, header.height);
+        } else if (header.format === 'BC7') {
+            byteArray = this.decodeBC7(new Uint8Array(buffer, header.dataOffset), header.width, header.height);
         }
 
         return {
@@ -282,6 +289,107 @@ class DDSDecoder {
                         rgba[idx + 2] = b;
                         rgba[idx + 3] = a;
                     }
+                }
+            }
+        }
+        return rgba;
+    }
+
+    // BC7 Decompression (all 8 modes), following the BPTC specification / bcdec
+    static decodeBC7(bytes, width, height) {
+        const rgba = new Uint8ClampedArray(width * height * 4);
+        const bitsRGB = [4, 6, 5, 7, 5, 7, 7, 5];   // endpoint bits per mode, colour
+        const bitsA = [0, 0, 0, 0, 6, 8, 7, 5];     // ...and alpha
+        const hasPBits = 0b11001011;                // modes 0, 1, 3, 6, 7
+        const W2 = [0, 21, 43, 64], W3 = [0, 9, 18, 27, 37, 46, 55, 64];
+        const W4 = [0, 4, 9, 13, 17, 21, 26, 30, 34, 38, 43, 47, 51, 55, 60, 64];
+        const lerp = (a, b, w, i) => ((64 - w[i]) * a + w[i] * b + 32) >> 6;
+        const words = new Uint32Array(4);
+        const ep = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+        const idx = new Uint8Array(16);
+        let pos = 0;
+        const read = n => {                         // n <= 8 bits, least significant first
+            const i = pos >> 5, o = pos & 31;
+            let v = words[i] >>> o;
+            if (o + n > 32) v |= words[i + 1] << (32 - o);
+            pos += n;
+            return v & ((1 << n) - 1);
+        };
+        let off = 0;
+        for (let by = 0; by < height; by += 4) {
+            for (let bx = 0; bx < width; bx += 4, off += 16) {
+                for (let k = 0; k < 4; k++)
+                    words[k] = (bytes[off + 4 * k] | (bytes[off + 4 * k + 1] << 8) | (bytes[off + 4 * k + 2] << 16) | (bytes[off + 4 * k + 3] << 24)) >>> 0;
+                pos = 0;
+                let mode = 0;
+                while (mode < 8 && read(1) === 0) mode++;
+                if (mode >= 8) continue;            // reserved: transparent black (the array is already 0)
+
+                let parts = 1, partition = 0, rotation = 0, isb = 0;
+                if (mode === 0 || mode === 1 || mode === 2 || mode === 3 || mode === 7) {
+                    parts = (mode === 0 || mode === 2) ? 3 : 2;
+                    partition = read(mode === 0 ? 4 : 6);
+                }
+                const nEp = parts * 2;
+                if (mode === 4 || mode === 5) {
+                    rotation = read(2);
+                    if (mode === 4) isb = read(1);
+                }
+                for (let c = 0; c < 3; c++) for (let e = 0; e < nEp; e++) ep[e][c] = read(bitsRGB[mode]);
+                if (bitsA[mode]) for (let e = 0; e < nEp; e++) ep[e][3] = read(bitsA[mode]);
+                else for (let e = 0; e < nEp; e++) ep[e][3] = 0;
+
+                const pb = (hasPBits >> mode) & 1;
+                if (pb) {
+                    for (let e = 0; e < nEp; e++) for (let c = 0; c < 4; c++) ep[e][c] <<= 1;
+                    if (mode === 1) {               // one P-bit shared by each subset's two endpoints
+                        const p0 = read(1), p1 = read(1);
+                        for (let c = 0; c < 3; c++) { ep[0][c] |= p0; ep[1][c] |= p0; ep[2][c] |= p1; ep[3][c] |= p1; }
+                    } else {
+                        for (let e = 0; e < nEp; e++) { const p = read(1); for (let c = 0; c < 4; c++) ep[e][c] |= p; }
+                    }
+                }
+                const nc = bitsRGB[mode] + pb, na = bitsA[mode] + pb;
+                for (let e = 0; e < nEp; e++) {
+                    for (let c = 0; c < 3; c++) { const v = ep[e][c] << (8 - nc); ep[e][c] = (v | (v >> nc)) & 255; }
+                    if (bitsA[mode]) { const v = ep[e][3] << (8 - na); ep[e][3] = (v | (v >> na)) & 255; }
+                    else ep[e][3] = 255;
+                }
+
+                const ib = (mode === 0 || mode === 1) ? 3 : (mode === 6 ? 4 : 2);
+                const ib2 = mode === 4 ? 3 : (mode === 5 ? 2 : 0);
+                const w1 = ib === 2 ? W2 : (ib === 3 ? W3 : W4), w2 = ib2 === 2 ? W2 : W3;
+                const table = parts > 1 ? BC7_TABLES[parts - 2] : null;
+                const base = partition * 16;
+                for (let t = 0; t < 16; t++) {
+                    const s = table ? table[base + t] : (t ? 0 : 8);
+                    idx[t] = read((s & 8) ? ib - 1 : ib);
+                }
+                for (let t = 0; t < 16; t++) {
+                    const s = (table ? table[base + t] : 0) & 3;
+                    const a0 = ep[2 * s], a1 = ep[2 * s + 1];
+                    const i1 = idx[t];
+                    let r, g, b, a;
+                    if (!ib2) {
+                        r = lerp(a0[0], a1[0], w1, i1); g = lerp(a0[1], a1[1], w1, i1);
+                        b = lerp(a0[2], a1[2], w1, i1); a = lerp(a0[3], a1[3], w1, i1);
+                    } else {
+                        const i2 = read(t ? ib2 : ib2 - 1);
+                        if (!isb) {
+                            r = lerp(a0[0], a1[0], w1, i1); g = lerp(a0[1], a1[1], w1, i1);
+                            b = lerp(a0[2], a1[2], w1, i1); a = lerp(a0[3], a1[3], w2, i2);
+                        } else {
+                            r = lerp(a0[0], a1[0], w2, i2); g = lerp(a0[1], a1[1], w2, i2);
+                            b = lerp(a0[2], a1[2], w2, i2); a = lerp(a0[3], a1[3], w1, i1);
+                        }
+                    }
+                    if (rotation === 1) { const x = a; a = r; r = x; }
+                    else if (rotation === 2) { const x = a; a = g; g = x; }
+                    else if (rotation === 3) { const x = a; a = b; b = x; }
+                    const px = bx + (t & 3), py = by + (t >> 2);
+                    if (px >= width || py >= height) continue;
+                    const o = (py * width + px) * 4;
+                    rgba[o] = r; rgba[o + 1] = g; rgba[o + 2] = b; rgba[o + 3] = a;
                 }
             }
         }

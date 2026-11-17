@@ -6,810 +6,337 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BeamNG Livery Studio</title>
     <meta name="description"
-        content="A browser-based livery creator for BeamNG.drive. Design high-fidelity vehicle skins with vector precision, dynamic curved text, and perfectly cropped Tattoo layers with native DDS support.">
+        content="A browser-based livery creator for BeamNG.drive: vector shapes, curved text, brushes, gradients and layers on the vehicle's UV template, with DDS import (BC1-BC7) and export.">
     <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&family=Anton&family=Bebas+Neue&family=Black+Ops+One&family=Bangers&family=Audiowide&family=Orbitron:wght@500;800&family=Oswald:wght@400;700&family=Permanent+Marker&family=Racing+Sans+One&family=Russo+One&family=Teko:wght@500;700&family=Pacifico&family=Roboto+Condensed:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <script type="importmap">
+        { "imports": { "fabric": "./vendor/fabric/fabric.min.mjs", "@erase2d/fabric": "./vendor/erase2d/fabric/index.js" } }
+    </script>
 </head>
 
 <body>
-    <header>
-        <div class="header-left">
-            <div class="logo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="beam-logo"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#f97316" />
-                    <path d="M2 17L12 22L22 17" stroke="#f97316" stroke-width="2" stroke-linejoin="round" />
-                    <path d="M2 12L12 17L22 12" stroke="#f97316" stroke-width="2" stroke-linejoin="round" />
-                </svg>
-                <span class="logo-text"><span style="color: #f97316; font-weight: 700;">BeamNG</span> <span
-                        style="font-weight: 400; opacity: 0.8;">Livery Studio</span></span>
-            </div>
-
-            <div class="header-separator"></div>
-
-            <button id="import-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Import
-                <input type="file" id="file-import" accept="image/*,.dds" hidden>
-            </button>
-            <button class="primary" id="export-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Export .DDS
-            </button>
-
-            <!-- Export Settings Group -->
-            <div class="export-settings-group">
-                <div style="display: flex; flex-direction: column; align-items: flex-start; margin-right: 4px;">
-                    <label
-                        style="font-size: 9px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 0;">Export
-                        Format</label>
-                    <div
-                        style="font-size: 11px; color: var(--text-primary); font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                        RGBA Uncompressed
-                        <div class="tooltip-container">
-                            <span style="color: var(--primary-color); cursor: help;">ⓘ</span>
-                            <div class="tooltip">
-                                Current: Lossless Quality (Large File).<br>
-                                For BC7/BC1 Compression (Small File), please use external tools like Paint.net or
-                                Photoshop on the exported file.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="width: 1px; height: 24px; background: var(--border-color); margin: 0 8px;"></div>
-
-                <input type="text" id="export-name" placeholder="VEHICLE.skin.SKINNAME" value="VEHICLE.skin.SKINNAME"
-                    style="width: 240px; background: transparent; border: none; color: var(--text-primary); height: 20px; font-size: 13px;">
-                <span style="color: var(--text-secondary); font-size: 11px;">.dds</span>
-            </div>
+    <header class="topbar">
+        <div class="brand">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#f97316" />
+                <path d="M2 17L12 22L22 17" stroke="#f97316" stroke-width="2" stroke-linejoin="round" />
+                <path d="M2 12L12 17L22 12" stroke="#f97316" stroke-width="2" stroke-linejoin="round" />
+            </svg>
+            <span><b>BeamNG</b> Livery Studio</span>
         </div>
 
-        <div class="header-center">
-            <div class="header-tools">
-                <button class="icon-btn" id="undo-btn" title="Undo (Ctrl+Z)">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 14L4 9l5-5" />
-                        <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
-                    </svg>
-                </button>
-                <button class="icon-btn" id="redo-btn" title="Redo (Ctrl+Y)">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 14l5-5-5-5" />
-                        <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <div class="header-right">
-            <button class="icon-btn" id="help-btn" title="Shortcuts & Help (?)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-            </button>
-            <div style="width: 1px; height: 16px; background: #333; margin: 0 4px;"></div>
-
-            <a href="guide.html" target="_blank" style="text-decoration: none;">
-                <button class="guide-btn">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
-                    Guide
-                </button>
-            </a>
-            <a href="https://github.com/Eagle10021/BeamNG-Livery-Maker/tree/master" target="_blank"
-                style="text-decoration: none;">
-                <button>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-                        </path>
-                    </svg>
-                    GitHub
-                </button>
-            </a>
-
-            <div style="display: flex; align-items: center; gap: 4px;">
-                <a href="https://www.photopea.com/" target="_blank" style="text-decoration: none;">
-                    <button>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                            <polyline points="21 15 16 10 5 21"></polyline>
-                        </svg>
-                        Photopea
-                    </button>
-                </a>
-                <div class="tooltip-container">
-                    <span style="color: #666; cursor: help; font-size: 14px;">ⓘ</span>
-                    <div class="tooltip" style="width: 220px;">
-                        <strong>Need advanced tools?</strong> Photopea is a free online editor (like Photoshop) perfect
-                        for complex masking or BC7 format conversion.
-                    </div>
+        <nav class="menus" id="menus">
+            <div class="menu"><button class="menu-btn">File</button>
+                <div class="menu-list">
+                    <button data-cmd="template">Choose template…<kbd>Ctrl+Shift+N</kbd></button>
+                    <button data-cmd="openGame">Open from your BeamNG install…</button>
+                    <hr>
+                    <button data-cmd="importImage">Import image / DDS as layer…<kbd>Ctrl+I</kbd></button>
+                    <button data-cmd="customBase">Use my own image as template…</button>
+                    <hr>
+                    <button data-cmd="openProject">Open project…<kbd>Ctrl+O</kbd></button>
+                    <button data-cmd="saveProject">Save project<kbd>Ctrl+S</kbd></button>
+                    <hr>
+                    <button data-cmd="export">Export skin…<kbd>Ctrl+E</kbd></button>
                 </div>
             </div>
+            <div class="menu"><button class="menu-btn">Edit</button>
+                <div class="menu-list">
+                    <button data-cmd="undo">Undo<kbd>Ctrl+Z</kbd></button>
+                    <button data-cmd="redo">Redo<kbd>Ctrl+Y</kbd></button>
+                    <hr>
+                    <button data-cmd="cut">Cut<kbd>Ctrl+X</kbd></button>
+                    <button data-cmd="copy">Copy<kbd>Ctrl+C</kbd></button>
+                    <button data-cmd="paste">Paste<kbd>Ctrl+V</kbd></button>
+                    <button data-cmd="duplicate">Duplicate<kbd>Ctrl+D</kbd></button>
+                    <button data-cmd="delete">Delete<kbd>Del</kbd></button>
+                    <hr>
+                    <button data-cmd="selectAll">Select all<kbd>Ctrl+A</kbd></button>
+                    <button data-cmd="group">Group<kbd>Ctrl+G</kbd></button>
+                    <button data-cmd="ungroup">Ungroup<kbd>Ctrl+Shift+G</kbd></button>
+                    <hr>
+                    <button data-cmd="rasterize">Rasterize to Tattoo</button>
+                    <button data-cmd="editPoints">Edit points<kbd>Enter</kbd></button>
+                </div>
+            </div>
+            <div class="menu"><button class="menu-btn">View</button>
+                <div class="menu-list">
+                    <button data-cmd="fit">Fit to screen<kbd>Ctrl+0</kbd></button>
+                    <button data-cmd="actual">Actual pixels<kbd>Ctrl+1</kbd></button>
+                    <button data-cmd="zoomIn">Zoom in<kbd>+</kbd></button>
+                    <button data-cmd="zoomOut">Zoom out<kbd>−</kbd></button>
+                    <hr>
+                    <button data-cmd="toggleOverlay" class="check" id="menu-overlay">Template on top</button>
+                    <button data-cmd="toggleSnap" class="check on" id="menu-snap">Snap to centre and edges</button>
+                </div>
+            </div>
+            <div class="menu"><button class="menu-btn">Help</button>
+                <div class="menu-list">
+                    <button data-cmd="help">Shortcuts<kbd>?</kbd></button>
+                    <a href="guide.html" target="_blank">Modding guide</a>
+                    <a href="https://github.com/Eagle10021/BeamNG-Livery-Maker" target="_blank" rel="noopener">GitHub</a>
+                </div>
+            </div>
+        </nav>
+
+        <button class="doc-chip" id="doc-chip" data-cmd="template" title="Choose a template">
+            <span id="doc-vehicle">No template</span><span class="muted" id="doc-size"></span>
+        </button>
+
+        <div class="topbar-right">
+            <button class="icon-btn" data-cmd="undo" title="Undo (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg></button>
+            <button class="icon-btn" data-cmd="redo" title="Redo (Ctrl+Y)"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5" /><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" /></svg></button>
+            <button class="primary" data-cmd="export"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></svg>Export</button>
         </div>
     </header>
 
-    <div class="app-container">
-        <!-- Left Panel -->
-        <aside class="panel" id="left-panel">
-            <div class="panel-toggle toggle-left" onclick="togglePanel('left-panel')">◀</div>
-            <div class="panel-content">
-                <div class="panel-title">Vehicle Setup</div>
-                <div class="tool-group">
-                    <div class="control-row">
-                        <select id="vehicle-select">
-                            <option>Loading...</option>
-                        </select>
-                    </div>
-                    <div class="control-row">
-                        <select id="skin-select" disabled>
-                            <option>-- Template --</option>
-                        </select>
-                    </div>
-                </div>
+    <!-- options for the current tool -->
+    <div class="optionsbar" id="optionsbar">
+        <span class="tool-name" id="opt-tool-name">Select</span>
+        <div class="opt" data-for="brush eraser"><label>Size</label><input type="range" id="opt-size" min="1" max="400" value="24"><input type="number" id="opt-size-n" min="1" max="2000" value="24"></div>
+        <div class="opt" data-for="brush"><label>Opacity</label><input type="range" id="opt-opacity" min="1" max="100" value="100"><span id="opt-opacity-v">100%</span></div>
+        <div class="opt" data-for="brush"><label>Softness</label><input type="range" id="opt-soft" min="0" max="100" value="0"><span id="opt-soft-v">0%</span></div>
+        <div class="opt" data-for="brush"><label>Brush</label><select id="opt-brush-kind"><option value="pencil">Smooth</option><option value="spray">Spray</option><option value="circle">Dots</option></select></div>
+        <div class="opt" data-for="eraser"><label>Erases</label><select id="opt-erase-target"><option value="selected">Selected layer</option><option value="all">All layers</option></select></div>
+        <div class="opt" data-for="shape line pen"><label>Fill</label><input type="checkbox" id="opt-fill-on" checked></div>
+        <div class="opt" data-for="shape line pen"><label>Outline</label><input type="number" id="opt-stroke-w" min="0" max="400" value="0"><span>px</span></div>
+        <div class="opt" data-for="shape"><label>Shape</label><button id="opt-shape-pick" class="shape-pick"></button></div>
+        <div class="opt" data-for="text"><label>Font</label><select id="opt-font"></select></div>
+        <div class="opt" data-for="text"><label>Size</label><input type="number" id="opt-font-size" min="4" max="2000" value="160"></div>
+        <div class="opt" data-for="fill"><label>Tolerance</label><input type="range" id="opt-tolerance" min="0" max="255" value="40"><span id="opt-tolerance-v">40</span></div>
+        <div class="opt" data-for="fill eyedropper"><label>Sample</label><select id="opt-sample"><option value="all">All layers</option><option value="template">Template only</option></select></div>
+        <div class="opt" data-for="gradient"><label>Type</label><select id="opt-grad-type"><option value="linear">Linear</option><option value="radial">Radial</option></select></div>
+        <span class="hint" id="opt-hint"></span>
+    </div>
 
-                <div class="tool-group">
-                    <div class="box-upload" id="upload-base-trigger"
-                        style="display:none; padding: 10px; border: 1px dashed #555; text-align:center; color: #888; font-size:11px; cursor:pointer;">
-                        Load Custom Base
-                        <input type="file" id="base-upload" accept="image/*,.dds" hidden>
-                    </div>
-                </div>
-
-                <div class="panel-title">Layer Transform</div>
-                <div id="properties-panel">
-                    <div class="control-row">
-                        <label>Blend Mode</label>
-                        <select id="prop-blend-mode">
-                            <option value="normal">Normal</option>
-                            <option value="multiply">Multiply</option>
-                            <option value="screen">Screen</option>
-                            <option value="overlay">Overlay</option>
-                            <option value="darken">Darken</option>
-                            <option value="lighten">Lighten</option>
-                            <option value="color-dodge">Color Dodge</option>
-                            <option value="color-burn">Color Burn</option>
-                            <option value="hard-light">Hard Light</option>
-                            <option value="soft-light">Soft Light</option>
-                            <option value="difference">Difference</option>
-                            <option value="exclusion">Exclusion</option>
-                            <option value="hue">Hue</option>
-                            <option value="saturation">Saturation</option>
-                            <option value="color">Color</option>
-                            <option value="luminosity">Luminosity</option>
-                        </select>
-                    </div>
-
-                    <div class="control-row">
-                        <label>Opacity <span>%</span></label>
-                        <input type="range" id="prop-opacity" min="0" max="100" value="100">
-                    </div>
-
-                    <div class="control-row">
-                        <label>Flip</label>
-                        <div style="display: flex; gap: 4px;">
-                            <button id="btn-flip-h" style="flex:1; justify-content: center; font-size: 10px;">Flip
-                                H</button>
-                            <button id="btn-flip-v" style="flex:1; justify-content: center; font-size: 10px;">Flip
-                                V</button>
-                        </div>
-                    </div>
-
-                    <div class="panel-title" style="margin-left:0; font-size:11px; margin-top:20px;">Transform</div>
-
-                    <div class="control-row">
-                        <label>Linked Mirror</label>
-                        <div style="display: flex; gap: 4px;">
-                            <button id="btn-mirror-h" style="flex:1; justify-content: center; font-size: 10px;">Mirror
-                                H</button>
-                            <button id="btn-mirror-v" style="flex:1; justify-content: center; font-size: 10px;">Mirror
-                                V</button>
-                        </div>
-                    </div>
-
-                    <div class="control-row">
-                        <label>Zoom (Layer Scale)</label>
-                        <input type="number" id="prop-scale" step="0.1" value="1">
-                    </div>
-
-                    <div class="control-row">
-                        <label>Rotation <span>deg</span></label>
-                        <div style="display:flex; gap:4px">
-                            <input type="range" id="prop-rotation-slider" min="-180" max="180" value="0" style="flex:1">
-                            <input type="number" id="prop-rotation" value="0" min="-180" max="180" style="width: 50px;">
-                        </div>
-                    </div>
-
-                    <div class="panel-title">Filters</div>
-                    <div class="control-row">
-                        <label>Hue</label>
-                        <input type="range" id="prop-hue" min="-180" max="180" value="0">
-                    </div>
-                    <div class="control-row">
-                        <label>Saturation</label>
-                        <input type="range" id="prop-saturation" min="0" max="200" value="100">
-                    </div>
-                    <div class="control-row">
-                        <label>Brightness</label>
-                        <input type="range" id="prop-brightness" min="0" max="200" value="100">
-                    </div>
-
-                    <div class="control-row" style="margin-top: 16px; margin-bottom: 8px;">
-                        <button id="rasterize-layer-btn"
-                            style="width: 100%; justify-content: center; background: #3b82f633; border-color: #3b82f666; color: #93c5fd; font-size: 11px;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" style="margin-right: 4px;">
-                                <path d="M12 2v20M2 12h20"></path>
-                            </svg>
-                            Rasterize to Tattoo
-                        </button>
-                    </div>
-
-                    <div class="control-row">
-                        <button id="delete-layer-btn"
-                            style="width: 100%; justify-content: center; background: #3f1d1d; border-color: #5c2b2b; color: #ef9a9a;">
-                            Delete Selected
-                        </button>
-                    </div>
-
-                    <div id="path-settings"
-                        style="display:none; border-top: 1px solid #333; margin-top:10px; padding-top:10px;">
-                        <div class="panel-title" style="margin-left:0; font-size:10px;">Path Settings</div>
-                        <div class="control-row">
-                            <label>Width</label>
-                            <input type="range" id="prop-path-width" min="1" max="100" value="2">
-                        </div>
-                        <div class="control-row">
-                            <label>Closed</label>
-                            <input type="checkbox" id="prop-path-closed" style="width:auto;">
-                        </div>
-                    </div>
-
-                    <div id="text-settings"
-                        style="display:none; border-top: 1px solid #333; margin-top:10px; padding-top:10px;">
-                        <div class="panel-title" style="margin-left:0; font-size:10px;">Text Settings</div>
-                        <div class="control-row">
-                            <label>Contents</label>
-                            <input type="text" id="prop-text-content" placeholder="Enter text...">
-                        </div>
-                        <div class="control-row">
-                            <label>Font Family</label>
-                            <select id="prop-text-font">
-                                <option value="Outfit">Outfit</option>
-                                <option value="Inter">Inter</option>
-                                <option value="Arial">Arial</option>
-                                <option value="Verdana">Verdana</option>
-                                <option value="Times New Roman">Times New Roman</option>
-                                <option value="Courier New">Courier New</option>
-                                <option value="Impact">Impact</option>
-                                <option value="Georgia">Georgia</option>
-                            </select>
-                        </div>
-                        <div class="control-row">
-                            <label>Font Size</label>
-                            <input type="number" id="prop-text-size" value="100" min="1" max="1000">
-                        </div>
-                        <div class="control-row">
-                            <label>Curve (Bend) <span>%</span></label>
-                            <div style="display:flex; gap:4px">
-                                <input type="range" id="prop-text-curve" min="-100" max="100" value="0" style="flex:1">
-                                <input type="number" id="prop-text-curve-num" value="0" style="width: 50px;">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="gradient-settings"
-                        style="display:none; border-top: 1px solid #333; margin-top:10px; padding-top:10px;">
-                        <div class="panel-title" style="margin-left:0; font-size:10px;">Gradient Settings</div>
-                        <div class="control-row">
-                            <label>Type</label>
-                            <select id="prop-grad-type">
-                                <option value="linear">Linear</option>
-                                <option value="radial">Radial (Circle)</option>
-                            </select>
-                        </div>
-                        <div class="control-row">
-                            <label>Angle</label>
-                            <input type="range" id="prop-grad-angle" min="0" max="360" value="90">
-                        </div>
-                        <div class="control-row">
-                            <label>Balance</label>
-                            <input type="range" id="prop-grad-balance" min="0" max="100" value="50">
-                        </div>
-                        <div class="control-row">
-                            <label>Curve (Bend)</label>
-                            <input type="range" id="prop-grad-curve" min="-100" max="100" value="0">
-                        </div>
-                        <div class="control-row">
-                            <label>Start Color</label>
-                            <input type="color" id="prop-grad-start" style="width:100%">
-                        </div>
-                        <div class="control-row">
-                            <label>End</label>
-                            <input type="color" id="prop-grad-end" style="width:100%">
-                        </div>
-                    </div>
-                </div>
+    <div class="app">
+        <nav class="toolbar" id="toolbar">
+            <button class="tool" data-tool="select" title="Select / Move (V)"><svg viewBox="0 0 24 24"><path d="M4 3l7 17 2.5-7.5L21 10z" /></svg></button>
+            <button class="tool" data-tool="hand" title="Hand (H, or hold Space)"><svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8" /><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.3l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15" /></svg></button>
+            <i class="sep"></i>
+            <button class="tool" data-tool="brush" title="Brush (B)"><svg viewBox="0 0 24 24"><path d="M9.5 14.5L3 21M18 3l3 3-9.5 9.5-3-3z" /><path d="M8.5 12.5l3 3" /></svg></button>
+            <button class="tool" data-tool="eraser" title="Eraser (E)"><svg viewBox="0 0 24 24"><path d="M20 20H8l-5-5 10-10 9 9-6 6" /><path d="M7 11l7 7" /></svg></button>
+            <button class="tool" data-tool="fill" title="Fill bucket (F)"><svg viewBox="0 0 24 24"><path d="M5 11l7-7 8 8-7 7z" /><path d="M5 11h15" /><path d="M20 16s2 2.5 2 3.5a2 2 0 0 1-4 0c0-1 2-3.5 2-3.5z" /></svg></button>
+            <button class="tool" data-tool="gradient" title="Gradient (G)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" /><path d="M3 9h18M3 15h18" opacity=".5" /></svg></button>
+            <i class="sep"></i>
+            <button class="tool" data-tool="shape" title="Shapes (U)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="10" height="10" rx="1" /><circle cx="16" cy="16" r="5" /></svg></button>
+            <button class="tool" data-tool="line" title="Line (L)"><svg viewBox="0 0 24 24"><path d="M5 19L19 5" /></svg></button>
+            <button class="tool" data-tool="pen" title="Pen (P)"><svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7z" /><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18z" /><circle cx="11" cy="11" r="2" /></svg></button>
+            <button class="tool" data-tool="text" title="Text (T)"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16" /></svg></button>
+            <i class="sep"></i>
+            <button class="tool" data-tool="eyedropper" title="Eyedropper (I)"><svg viewBox="0 0 24 24"><path d="M2 22l1-1h3l9-9M3 21v-3l9-9" /><path d="M15 6l3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3z" /></svg></button>
+            <div class="swatches" title="Colours: click to change, X to swap">
+                <input type="color" id="color-fg" value="#f97316" title="Main colour">
+                <input type="color" id="color-bg" value="#111111" title="Second colour (gradients)">
+                <button id="color-swap" title="Swap (X)"><svg viewBox="0 0 24 24"><path d="M7 4L3 8l4 4M3 8h13a4 4 0 0 1 4 4v1M17 20l4-4-4-4M21 16H8a4 4 0 0 1-4-4v-1" /></svg></button>
             </div>
-        </aside>
+        </nav>
 
-        <!-- Left Toolbar Strip -->
-        <div class="toolbar-strip">
-            <button class="tool-btn active" id="tool-move" title="Select / Move (V)">
-                <!-- Cursor Arrow -->
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
-                    <path d="M13 13l6 6" />
-                </svg>
-            </button>
-            <button class="tool-btn" id="tool-hand" title="Hand Tool (H)">
-                <!-- Hand -->
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
-                    <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
-                    <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
-                    <path
-                        d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
-                </svg>
-            </button>
-            <button class="tool-btn" id="tool-brush" title="Paint Brush (B)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 20a4 4 0 0 0-4-4H4v8h10a4 4 0 0 0 4-4z" />
-                    <path d="M14 16l-4-12L6 16" />
-                </svg>
-            </button>
-            <button class="tool-btn" id="tool-eraser" title="Eraser (E)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 20H7L3 16c-.6-.6-.6-1.5 0-2L14 3c.6-.6 1.5-.6 2 0l5 5c.6.6.6 1.5 0 2L10 21" />
-                    <path d="M7 20h13" />
-                </svg>
-            </button>
-            <!-- Shape Tool with Flyout -->
-            <div class="tool-group" style="position: relative;">
-                <button class="tool-btn" id="tool-shapes" title="Shapes">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                    </svg>
-                </button>
-                <div id="shapes-flyout" class="flyout-menu">
-                    <div class="flyout-grid">
-                        <div class="flyout-item" data-shape="rect" title="Rectangle">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="circle" title="Circle">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <circle cx="12" cy="12" r="10" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="triangle" title="Triangle">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 2L22 20H2z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="star" title="Star">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polygon
-                                    points="12 2 15 8.5 22 9.3 17 14.1 18.2 21 12 17.7 5.8 21 7 14.1 2 9.3 9 8.5" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="arrow" title="Arrow">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="diamond" title="Diamond">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 2L22 12L12 22L2 12Z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="hexagon" title="Hexagon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 2L21 7V17L12 22L3 17V7Z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="octagon" title="Octagon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M8 2h8l6 6v8l-6 6H8l-6-6V8z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="heart" title="Heart">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path
-                                    d="M20.8 4.6a5.5 5.5 0 0 0-7.7 0l-1.1 1-1-1a5.5 5.5 0 0 0-7.7 7.6l1.1 1L12 21l7.6-7.7 1.2-1.2a5.5 5.5 0 0 0 0-7.5z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="cross" title="Cross">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 2V22M2 12H22" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="moon" title="Moon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="sun" title="Sun">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <circle cx="12" cy="12" r="5" />
-                                <path
-                                    d="M12 1V3M12 21V23M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12H3M21 12H23M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="cloud" title="Cloud">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="shield" title="Shield">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="lightning" title="Lightning">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M13 2 L3 14 L12 14 L11 22 L21 10 L12 10 L13 2 Z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="gear" title="Gear">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <circle cx="12" cy="12" r="3" />
-                                <path
-                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="flame" title="Flame">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path
-                                    d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3 3.5 3 5 5 5 8 0 2.21-1.79 4-4 4s-4-1.79-4-4c0-1.5.5-2.5 1-3.5 0 0-1.5 1.5-1.5 2.5 0 1.5 1.5 2.5 1.5 2.5z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="check" title="Checkmark">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="plus" title="Plus">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="minus" title="Minus">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="semicircle" title="Semi-Circle">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 21a9 9 0 0 1 0-18z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="trapezoid" title="Trapezoid">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M7 5h10l5 14H2z" />
-                            </svg>
-                        </div>
-                        <div class="flyout-item" data-shape="parallelogram" title="Parallelogram">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M7 5h14l-4 14H3z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
+        <main class="stage" id="stage">
+            <canvas id="c"></canvas>
+            <div class="empty" id="empty-state">
+                <h2>Start a livery</h2>
+                <p>Pick a vehicle template, or open one straight from your BeamNG install.</p>
+                <div class="row"><button class="primary" data-cmd="template">Choose a template</button><button data-cmd="openGame">Open from BeamNG…</button></div>
+                <p class="muted small">Drop an image, a .dds or a saved project anywhere to open it.</p>
             </div>
-
-            <button class="tool-btn" id="tool-fill" title="Fill Bucket (F)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m4 4 7.07 17 2.51-7.39 7.39-2.51L4 4z" />
-                    <path d="M22 22H2" />
-                    <path d="M12 12l10-10" />
-                </svg>
-            </button>
-            <button class="tool-btn" id="tool-gradient" title="Gradient Tool (G)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d946ef" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M2 12h20"></path>
-                    <defs>
-                        <linearGradient id="icon-grad" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stop-color="currentColor" stop-opacity="0.2" />
-                            <stop offset="100%" stop-color="currentColor" stop-opacity="1" />
-                        </linearGradient>
-                    </defs>
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#icon-grad)" stroke="none"></rect>
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                </svg>
-            </button>
-            <button class="tool-btn" id="tool-eyedropper" title="Eyedropper (I)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m2 22 1-1h3l9-9" />
-                    <path d="M3 21v-3l9-9" />
-                    <path
-                        d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z" />
-                </svg>
-            </button>
-            <button class="tool-btn" id="tool-text" title="Text (T)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="4 7 4 4 20 4 20 7" />
-                    <line x1="9" y1="20" x2="15" y2="20" />
-                    <line x1="12" y1="4" x2="12" y2="20" />
-                </svg>
-            </button>
-            <button class="tool-btn" id="tool-pen" title="Pen Tool (P)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m12 19 7-7 3 3-7 7-3-3z" />
-                    <path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-                    <path d="m2 2 5 22 5-22z" style="display:none;" />
-                    <path d="M12 11h.01" />
-                </svg>
-            </button>
-            <button class="tool-btn" id="tool-line" title="Line (L)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="5" y1="19" x2="19" y2="5" />
-                </svg>
-            </button>
-        </div>
-
-        <!-- Main Workspace -->
-        <main class="workspace" id="workspace">
-            <div id="canvas-container">
-                <canvas id="livery-canvas"></canvas>
+            <div class="zoombox">
+                <button data-cmd="zoomOut" title="Zoom out">−</button>
+                <button id="zoom-label" data-cmd="fit" title="Fit to screen">100%</button>
+                <button data-cmd="zoomIn" title="Zoom in">+</button>
             </div>
-
-            <!-- Floating View Controls -->
-
         </main>
 
-        <!-- Right Panel -->
-        <aside class="panel panel-right" id="right-panel">
-            <div class="panel-toggle toggle-right" onclick="togglePanel('right-panel')">▶</div>
-            <div class="panel-content">
-                <div class="panel-title">Layers</div>
-                <div style="display: flex; gap: 4px; margin-bottom: 8px;">
-                    <button id="new-paint-layer-btn" style="flex: 1; justify-content: center; font-size: 11px;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        New Paint Layer
-                    </button>
-                    <button id="toggle-lock-btn" title="Lock/Unlock Selected Layer"
-                        style="padding: 6px 10px; font-size: 14px;">
-                        🔓
-                    </button>
-                </div>
+        <aside class="sidebar" id="sidebar">
+            <section class="panel" id="props">
+                <h3>Properties <span class="muted" id="props-kind"></span></h3>
+                <div id="props-empty" class="muted small pad">Select a layer to edit it. Corner handles keep proportions (hold Shift to stretch); Alt resizes from the centre.</div>
+                <div id="props-body" hidden>
+                    <div class="grid2">
+                        <label>X<input type="number" id="p-x"></label>
+                        <label>Y<input type="number" id="p-y"></label>
+                        <label>W<input type="number" id="p-w" min="1"></label>
+                        <label>H<input type="number" id="p-h" min="1"></label>
+                        <label>Angle<input type="number" id="p-angle" step="1"></label>
+                        <label>Opacity<input type="number" id="p-opacity" min="0" max="100"></label>
+                    </div>
+                    <div class="row wrap">
+                        <select id="p-blend" title="Blend mode">
+                            <option value="source-over">Normal</option><option value="multiply">Multiply</option><option value="screen">Screen</option>
+                            <option value="overlay">Overlay</option><option value="darken">Darken</option><option value="lighten">Lighten</option>
+                            <option value="color-dodge">Colour dodge</option><option value="color-burn">Colour burn</option><option value="hard-light">Hard light</option>
+                            <option value="soft-light">Soft light</option><option value="difference">Difference</option><option value="exclusion">Exclusion</option>
+                            <option value="hue">Hue</option><option value="saturation">Saturation</option><option value="color">Colour</option><option value="luminosity">Luminosity</option>
+                        </select>
+                    </div>
+                    <div class="row btns">
+                        <button data-cmd="flipH" title="Flip horizontally">Flip H</button>
+                        <button data-cmd="flipV" title="Flip vertically">Flip V</button>
+                        <button data-cmd="mirrorH" title="Linked copy mirrored across the template's vertical centre line">Mirror ↔</button>
+                        <button data-cmd="mirrorV" title="Linked copy mirrored across the horizontal centre line">Mirror ↕</button>
+                    </div>
+                    <div class="row btns align" title="Align to the template">
+                        <button data-cmd="alignL" title="Align left"><svg viewBox="0 0 24 24"><path d="M4 3v18M8 7h12v4H8zM8 13h7v4H8z" /></svg></button>
+                        <button data-cmd="alignCX" title="Centre horizontally"><svg viewBox="0 0 24 24"><path d="M12 3v18M6 7h12v4H6zM8 13h8v4H8z" /></svg></button>
+                        <button data-cmd="alignR" title="Align right"><svg viewBox="0 0 24 24"><path d="M20 3v18M4 7h12v4H4zM9 13h7v4H9z" /></svg></button>
+                        <button data-cmd="alignT" title="Align top"><svg viewBox="0 0 24 24"><path d="M3 4h18M7 8h4v12H7zM13 8h4v7h-4z" /></svg></button>
+                        <button data-cmd="alignCY" title="Centre vertically"><svg viewBox="0 0 24 24"><path d="M3 12h18M7 6h4v12H7zM13 8h4v8h-4z" /></svg></button>
+                        <button data-cmd="alignB" title="Align bottom"><svg viewBox="0 0 24 24"><path d="M3 20h18M7 4h4v12H7zM13 9h4v7h-4z" /></svg></button>
+                    </div>
 
-                <!-- Brush & Color Controls (Always Visible) -->
-                <div id="brush-controls"
-                    style="margin-bottom: 12px; padding: 8px; background: #222; border-radius: 6px;">
-                    <div class="panel-title" style="margin-top: 0; font-size: 10px;">Color & Brush</div>
-
-                    <!-- Color Swatches -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
-                        <div style="position: relative; width: 48px; height: 48px;">
-                            <div id="fg-color-display"
-                                style="width: 32px; height: 32px; background: #ffffff; border: 2px solid #666; border-radius: 4px; position: absolute; top: 0; left: 0; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
-                            </div>
-                            <div id="bg-color-display"
-                                style="width: 32px; height: 32px; background: #000000; border: 2px solid #666; border-radius: 4px; position: absolute; bottom: 0; right: 0; cursor: pointer; z-index: 1;">
-                            </div>
+                    <div class="sub" id="p-fill-box">
+                        <h4>Fill</h4>
+                        <div class="row">
+                            <select id="p-fill-kind"><option value="solid">Solid</option><option value="linear">Linear gradient</option><option value="radial">Radial gradient</option><option value="none">None</option></select>
+                            <input type="color" id="p-fill">
+                            <input type="color" id="p-fill2" title="Second gradient colour">
                         </div>
-                        <div style="flex: 1;">
-                            <input type="color" id="brush-color" value="#ffffff"
-                                style="width:100%; height:36px; padding:0; background:none; border:1px solid #444; border-radius:4px; cursor:pointer;">
+                        <div class="row" id="p-grad-row"><label class="inline">Angle<input type="range" id="p-grad-angle" min="0" max="360" value="90"></label><label class="inline">Balance<input type="range" id="p-grad-mid" min="5" max="95" value="50"></label></div>
+                        <h4>Outline</h4>
+                        <div class="row"><input type="color" id="p-stroke"><input type="number" id="p-stroke-w" min="0" max="500" value="0" title="Outline width"><span class="muted small">px</span></div>
+                    </div>
+
+                    <div class="sub" id="p-text-box">
+                        <h4>Text</h4>
+                        <textarea id="p-text" rows="2"></textarea>
+                        <div class="row"><select id="p-font"></select><input type="number" id="p-font-size" min="4" max="2000" title="Size"></div>
+                        <div class="row btns">
+                            <button id="p-bold" title="Bold"><b>B</b></button><button id="p-italic" title="Italic"><i>I</i></button>
+                            <button id="p-align-l" title="Align left">≡ L</button><button id="p-align-c" title="Centre">≡ C</button><button id="p-align-r" title="Align right">≡ R</button>
                         </div>
+                        <label class="inline">Spacing<input type="range" id="p-spacing" min="-200" max="1000" value="0"></label>
+                        <label class="inline">Curve<input type="range" id="p-curve" min="-100" max="100" value="0"></label>
                     </div>
 
-                    <div class="control-row">
-                        <label>Brush Size <span id="brush-size-val">10</span>px</label>
-                        <input type="range" id="brush-size" min="1" max="100" value="10">
+                    <div class="sub" id="p-image-box">
+                        <h4>Adjust</h4>
+                        <label class="inline">Hue<input type="range" id="p-hue" min="-180" max="180" value="0"></label>
+                        <label class="inline">Saturation<input type="range" id="p-sat" min="-100" max="100" value="0"></label>
+                        <label class="inline">Brightness<input type="range" id="p-bright" min="-100" max="100" value="0"></label>
+                        <label class="inline">Tint<input type="color" id="p-tint" value="#ffffff"><input type="range" id="p-tint-a" min="0" max="100" value="0" title="Tint strength"></label>
                     </div>
 
-                    <div class="control-row">
-                        <label>Brush Opacity <span id="brush-opacity-val">100</span>%</label>
-                        <input type="range" id="brush-opacity" min="0" max="100" value="100">
-                    </div>
-
-                    <div class="control-row">
-                        <label>Brush Hardness <span id="brush-hardness-val">100</span>%</label>
-                        <input type="range" id="brush-hardness" min="0" max="100" value="100">
-                    </div>
-                </div>
-
-                <div class="layer-list" id="layer-list">
-                    <!-- Layers will be populated here -->
-                </div>
-
-                <!-- Zoom Controls -->
-                <div id="zoom-controls-container"
-                    style="margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; flex-shrink: 0;">
-                    <div class="control-row">
-                        <label>Canvas Zoom <span id="zoom-level">100%</span></label>
-                        <div style="display:flex; gap:4px; align-items: center;">
-                            <input type="range" id="canvas-zoom-slider" min="10" max="400" value="100" style="flex:1">
-                            <button class="icon-btn" id="reset-view-btn" title="Fit to Screen"
-                                style="width: 24px; height: 24px;">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M15 3h6v6"></path>
-                                    <path d="M9 21H3v-6"></path>
-                                    <path d="M21 3l-7 7"></path>
-                                    <path d="M3 21l7-7"></path>
-                                </svg>
-                            </button>
-                        </div>
+                    <div class="row btns">
+                        <button data-cmd="rasterize" title="Turn into a picture you can recolour and transform freely">Rasterize</button>
+                        <button data-cmd="editPoints" id="p-edit-points" title="Move the outline's points (Enter)">Edit points</button>
+                        <button data-cmd="delete" class="danger">Delete</button>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <section class="panel grow" id="layers-panel">
+                <h3>Layers
+                    <span class="panel-actions">
+                        <button class="icon-btn" data-cmd="newPaint" title="New paint layer"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg></button>
+                        <button class="icon-btn" data-cmd="group" title="Group (Ctrl+G)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1" /><rect x="13" y="13" width="8" height="8" rx="1" /><path d="M7 11v4h4M17 13V9h-4" /></svg></button>
+                        <button class="icon-btn" data-cmd="delete" title="Delete (Del)"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3" /></svg></button>
+                    </span>
+                </h3>
+                <ul class="layers" id="layers"></ul>
+            </section>
         </aside>
     </div>
 
-    <!-- Text Modal -->
-    <div id="text-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="width: 400px;">
-            <div class="modal-header">
-                <h2>Add Text Layer</h2>
-                <button onclick="document.getElementById('text-modal').style.display='none'"
-                    style="background:transparent; border:none; color:#888; font-size:20px;">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="control-row">
-                    <label>Text Content</label>
-                    <input type="text" id="modal-text-input" placeholder="Type here..."
-                        style="width: 100%; margin-top: 10px;">
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button id="modal-text-cancel" style="flex: 1; justify-content: center;">Cancel</button>
-                    <button id="modal-text-confirm" class="primary" style="flex: 1; justify-content: center;">Add
-                        Text</button>
-                </div>
-            </div>
+    <footer class="statusbar">
+        <span id="status-hint">Choose a template to begin.</span>
+        <span class="spacer"></span>
+        <span id="status-pos"></span>
+        <span id="status-doc"></span>
+        <span id="status-save" class="muted"></span>
+    </footer>
+
+    <!-- shape picker -->
+    <div class="popover" id="shape-popover" hidden><div class="shape-grid" id="shape-grid"></div></div>
+
+    <!-- template chooser -->
+    <dialog id="dlg-template" class="dlg wide">
+        <header><h2>Choose a template</h2><button class="x" data-close>×</button></header>
+        <div class="tabs"><button class="tab on" data-tab="bundled">Included templates</button><button class="tab" data-tab="game">From your BeamNG install</button></div>
+        <div class="tabpage" data-page="bundled">
+            <input type="search" id="tpl-search" placeholder="Search vehicles…">
+            <div class="tpl-grid" id="tpl-list"></div>
+            <p class="muted small">Templates from the "Skin Helper" mod by Beamer XD. Newer vehicles: use the BeamNG install tab, which reads the game's own UV templates.</p>
         </div>
+        <div class="tabpage" data-page="game" hidden>
+            <p class="small">Pick a vehicle's <code>.zip</code> from your game folder: <code>BeamNG.drive/content/vehicles/</code>. Nothing is uploaded; the file is read in this browser.</p>
+            <div class="row">
+                <button class="primary" id="game-pick-folder" hidden>Choose the vehicles folder…</button>
+                <button id="game-pick-zip">Choose a vehicle .zip…</button>
+                <input type="file" id="game-zip-input" accept=".zip" hidden>
+            </div>
+            <input type="search" id="game-search" placeholder="Search vehicles…" hidden>
+            <div class="tpl-grid" id="game-vehicles"></div>
+            <div id="game-entries"></div>
+        </div>
+    </dialog>
+
+    <!-- export -->
+    <dialog id="dlg-export" class="dlg">
+        <header><h2>Export skin</h2><button class="x" data-close>×</button></header>
+        <label>File name<div class="row"><input type="text" id="exp-name" value="vehicle_skin_mylivery"><select id="exp-format"><option value="dds">.dds (uncompressed RGBA)</option><option value="png">.png</option></select></div></label>
+        <label class="check-row"><input type="checkbox" id="exp-template"> Include the template layer</label>
+        <label class="check-row"><input type="checkbox" id="exp-hidden"> Include hidden layers</label>
+        <p class="muted small" id="exp-info"></p>
+        <p class="muted small">The .dds is lossless and large. BeamNG loads it as it is; to make it smaller, convert it to BC7 in a tool such as Paint.NET, texconv or Photopea. See the <a href="guide.html" target="_blank">guide</a> for the mod's folders and files.</p>
+        <footer><button data-close>Cancel</button><button class="primary" id="exp-go">Export</button></footer>
+    </dialog>
+
+    <!-- shortcuts -->
+    <dialog id="dlg-help" class="dlg">
+        <header><h2>Shortcuts</h2><button class="x" data-close>×</button></header>
+        <div class="keys">
+            <div><kbd>V</kbd> Select</div><div><kbd>H</kbd> / hold <kbd>Space</kbd> Pan</div>
+            <div><kbd>B</kbd> Brush</div><div><kbd>E</kbd> Eraser</div>
+            <div><kbd>F</kbd> Fill bucket</div><div><kbd>G</kbd> Gradient</div>
+            <div><kbd>U</kbd> Shapes</div><div><kbd>L</kbd> Line</div>
+            <div><kbd>P</kbd> Pen</div><div><kbd>T</kbd> Text</div>
+            <div><kbd>I</kbd> Eyedropper</div><div><kbd>X</kbd> Swap colours</div>
+            <div><kbd>[</kbd> <kbd>]</kbd> Brush size</div><div><kbd>Enter</kbd> Edit points / finish pen</div>
+            <div><kbd>Ctrl+Z</kbd> Undo</div><div><kbd>Ctrl+Y</kbd> Redo</div>
+            <div><kbd>Ctrl+C</kbd> / <kbd>V</kbd> / <kbd>X</kbd> Copy, paste, cut</div><div><kbd>Ctrl+D</kbd> Duplicate</div>
+            <div><kbd>Ctrl+G</kbd> Group</div><div><kbd>Ctrl+Shift+G</kbd> Ungroup</div>
+            <div><kbd>Ctrl+]</kbd> / <kbd>[</kbd> Forward / back</div><div><kbd>Arrows</kbd> Nudge (Shift ×10)</div>
+            <div><kbd>Ctrl+0</kbd> Fit</div><div><kbd>Ctrl+1</kbd> Actual pixels</div>
+            <div><kbd>Wheel</kbd> Zoom</div><div><kbd>Middle drag</kbd> Pan</div>
+            <div><kbd>Shift</kbd> Stretch freely / 15° steps</div><div><kbd>Alt</kbd> Resize from the centre</div>
+            <div><kbd>Ctrl+S</kbd> Save project</div><div><kbd>Ctrl+E</kbd> Export</div>
+        </div>
+    </dialog>
+
+    <!-- right-click menu -->
+    <div class="ctxmenu" id="ctxmenu" hidden>
+        <button data-cmd="cut">Cut<kbd>Ctrl+X</kbd></button>
+        <button data-cmd="copy">Copy<kbd>Ctrl+C</kbd></button>
+        <button data-cmd="paste">Paste<kbd>Ctrl+V</kbd></button>
+        <button data-cmd="duplicate">Duplicate<kbd>Ctrl+D</kbd></button>
+        <hr>
+        <button data-cmd="front">Bring to front<kbd>Ctrl+Shift+]</kbd></button>
+        <button data-cmd="forward">Bring forward<kbd>Ctrl+]</kbd></button>
+        <button data-cmd="backward">Send backward<kbd>Ctrl+[</kbd></button>
+        <button data-cmd="back">Send to back<kbd>Ctrl+Shift+[</kbd></button>
+        <hr>
+        <button data-cmd="flipH">Flip horizontally</button>
+        <button data-cmd="flipV">Flip vertically</button>
+        <button data-cmd="mirrorH">Linked mirror ↔</button>
+        <hr>
+        <button data-cmd="group">Group<kbd>Ctrl+G</kbd></button>
+        <button data-cmd="ungroup">Ungroup<kbd>Ctrl+Shift+G</kbd></button>
+        <button data-cmd="rasterize">Rasterize to Tattoo</button>
+        <button data-cmd="lock">Lock / unlock</button>
+        <hr>
+        <button data-cmd="delete" class="danger">Delete<kbd>Del</kbd></button>
     </div>
 
-    <!-- Help Modal -->
-    <div id="help-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="width: 500px;">
-            <div class="modal-header">
-                <h2>Shortcuts & Help</h2>
-                <button onclick="document.getElementById('help-modal').style.display='none'"
-                    style="background:transparent; border:none; color:#888; font-size:20px;">&times;</button>
-            </div>
-            <div class="modal-body">
-                <h3>Tools</h3>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                    <div>Select / Move</div>
-                    <div><span class="shortcut">V</span></div>
-                    <div>Hand Tool</div>
-                    <div><span class="shortcut">H</span> / Space</div>
-                    <div>Brush</div>
-                    <div><span class="shortcut">B</span></div>
-                    <div>Eraser</div>
-                    <div><span class="shortcut">E</span></div>
-                    <div>Eyedropper</div>
-                    <div><span class="shortcut">I</span></div>
-                    <div>Text</div>
-                    <div><span class="shortcut">T</span></div>
-                    <div>Pen</div>
-                    <div><span class="shortcut">P</span></div>
-                </div>
+    <input type="file" id="file-image" accept="image/*,.dds" multiple hidden>
+    <input type="file" id="file-base" accept="image/*,.dds" hidden>
+    <input type="file" id="file-project" accept=".json,.livery" hidden>
+    <div class="toast" id="toast" hidden></div>
 
-                <h3>Actions</h3>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                    <div>Undo</div>
-                    <div><span class="shortcut">Ctrl+Z</span></div>
-                    <div>Redo</div>
-                    <div><span class="shortcut">Ctrl+Y</span></div>
-                    <div>Duplicate Layer</div>
-                    <div><span class="shortcut">Ctrl+D</span></div>
-                    <div>Delete Layer</div>
-                    <div><span class="shortcut">Del</span></div>
-                    <div>Copy Layer</div>
-                    <div><span class="shortcut">Ctrl+C</span></div>
-                    <div>Paste Layer</div>
-                    <div><span class="shortcut">Ctrl+V</span></div>
-                </div>
-
-                <h3>Navigation</h3>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                    <div>Zoom</div>
-                    <div><span class="shortcut">Mouse Wheel</span></div>
-                    <div>Pan</div>
-                    <div><span class="shortcut">Space + Drag</span></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Context Menu -->
-    <div id="context-menu" class="context-menu" style="display: none;">
-        <div class="menu-item" id="ctx-delete">
-            <span style="color:#ef9a9a;">🗑 Delete Layer</span>
-            <span class="shortcut">Del</span>
-        </div>
-        <div class="menu-divider"></div>
-        <div class="menu-item" id="ctx-duplicate">
-            <span>Duplicate</span>
-            <span class="shortcut">Ctrl+D</span>
-        </div>
-        <div class="menu-divider"></div>
-        <div class="menu-item" id="ctx-bring-front">Bring to Front</div>
-        <div class="menu-item" id="ctx-send-back">Send to Back</div>
-        <div class="menu-divider"></div>
-        <div class="menu-item" id="ctx-flip-h">Flip Horizontal</div>
-        <div class="menu-item" id="ctx-flip-v">Flip Vertical</div>
-        <div class="menu-divider"></div>
-        <div class="menu-item" id="ctx-lock">Lock / Unlock</div>
-    </div>
-
-    <!-- Simple Script for Toggling -->
-    <script>
-        function togglePanel(id) {
-            const el = document.getElementById(id);
-            el.classList.toggle('collapsed');
-            const toggle = el.querySelector('.panel-toggle');
-            if (id === 'left-panel') toggle.innerText = el.classList.contains('collapsed') ? '▶' : '◀';
-            else toggle.innerText = el.classList.contains('collapsed') ? '◀' : '▶';
-        }
-    </script>
     <script src="dds.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="js/studio.js"></script>
 </body>
 
 </html>

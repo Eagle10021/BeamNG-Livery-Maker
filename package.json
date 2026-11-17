@@ -1,12 +1,9 @@
 {
   "name": "beamng-livery-maker",
-  "version": "1.0.0",
-  "description": "Livery Maker for BeamNG",
+  "version": "0.4.0",
+  "description": "BeamNG Livery Studio: a browser-based livery creator for BeamNG.drive",
   "scripts": {
-    "build:assets": "node scripts/import-assets.js"
-  },
-  "dependencies": {
-    "sharp": "^0.34.5"
+    "start": "http-server -c-1 ."
   },
   "devDependencies": {
     "http-server": "^14.1.1"
